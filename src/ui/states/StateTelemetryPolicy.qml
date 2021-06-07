@@ -13,51 +13,49 @@ import "../components"
 VPNFlickable {
     id: vpnFlickable
 
+    flickContentHeight: column.y + column.implicitHeight
     Component.onCompleted: {
-        flickContentHeight = column.childrenRect.height;
         fade.start();
+    }
+
+    VPNPanel {
+        id: panel
+        logo: "../resources/updateRecommended.svg"
+        logoTitle: qsTrId("vpn.settings.dataCollection")
+        //% "We strive to provide you with choices and collect only the technical data we need to improve Mozilla VPN. Sharing data with Mozilla is optional."
+        logoSubtitle: qsTrId("vpn.telemetryPolicy.telemetryDisclaimer")
+        anchors.top: parent.top
+        anchors.topMargin: (Math.max(window.safeContentHeight * .08, Theme.windowMargin * 2))
     }
 
     ColumnLayout {
         id: column
-        width: vpnFlickable.width
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
-        spacing: Theme.windowMargin * 1.25
+        anchors.fill: parent
+        anchors.leftMargin: Theme.windowMargin
+        anchors.rightMargin: Theme.windowMargin
+        anchors.topMargin: panel.height + panel.y
+        spacing: 0
+
 
         VPNVerticalSpacer {
-            Layout.fillWidth: true
-            height: Theme.windowMargin
+            Layout.preferredHeight: (Math.max(window.safeContentHeight * .08, Theme.windowMargin))
         }
 
-        VPNPanel {
-            logo: "../resources/updateRecommended.svg"
-            logoTitle: qsTrId("vpn.settings.dataCollection")
-            //% "We strive to provide you with choices and collect only the technical data we need to improve Mozilla VPN. Sharing data with Mozilla is optional."
-            logoSubtitle: qsTrId("vpn.telemetryPolicy.telemetryDisclaimer")
-            Layout.fillWidth: true
-            anchors.horizontalCenter: undefined
-            height: undefined
-            width: undefined
-
-            Layout.preferredHeight: childrenRect.height
-        }
 
         ColumnLayout {
-            spacing: Theme.windowMargin * 1.25
-            Layout.fillWidth: true
-            Layout.alignment: Qt.AlignHCenter
+            spacing: Theme.windowMargin
+            Layout.maximumWidth: Theme.maxHorizontalContentWidth
+            Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
+            Layout.leftMargin: Theme.windowMargin * 2
+            Layout.rightMargin: Theme.windowMargin * 2
+            Layout.fillHeight: true
 
-            VPNSubtitle {
+            VPNSubtitle  {
                 id: logoSubtitle
-
-                Layout.alignment: Qt.AlignHCenter
-                Layout.leftMargin: Theme.windowMargin * 3
-                Layout.rightMargin: Theme.windowMargin * 3
-                Layout.maximumWidth: Theme.maxHorizontalContentWidth
-                Layout.fillWidth: true
                 //% "Allow Mozilla VPN to send technical data to Mozilla?"
                 text: qsTrId("vpn.telemetryPolicy.allowMozillaToSendData")
+                width: undefined
+                Layout.fillWidth: true
             }
 
             VPNButton {
@@ -65,7 +63,10 @@ VPNFlickable {
                 objectName: "telemetryPolicyButton"
                 //% "Allow on this device"
                 text: qsTrId("vpn.telemetryPolicy.allowOnThisDevice")
-                radius: 5
+                width: undefined
+                height: undefined
+                Layout.fillWidth: true
+                Layout.minimumHeight: Theme.rowHeight
                 onClicked: {
                     VPNSettings.gleanEnabled = true;
                     VPN.telemetryPolicyCompleted();
@@ -77,43 +78,48 @@ VPNFlickable {
                 objectName: "declineTelemetryLink"
                 //% "Don’t allow"
                 labelText: qsTrId("vpn.telemetryPolicy.doNotAllow")
-                Layout.alignment: Qt.AlignHCenter
+                Layout.fillWidth: true
                 onClicked: {
                     VPNSettings.gleanEnabled = false;
                     VPN.telemetryPolicyCompleted();
                 }
             }
-        }
 
-        ColumnLayout {
-            Layout.fillWidth: true
-            Layout.alignment: Qt.AlignHCenter
-            spacing: 0
-            VPNSubtitle {
-                Layout.alignment: Qt.AlignHCenter
-                Layout.leftMargin: Theme.windowMargin * 3
-                Layout.rightMargin: Theme.windowMargin * 3
-                Layout.maximumWidth: Theme.maxHorizontalContentWidth
-                Layout.fillWidth: true
-                //% "Learn more about what data Mozilla collects and how it’s used."
-                text: qsTrId("vpn.telemetryPolicy.learnMoreAboutData")
+            VPNVerticalSpacer {
+                Layout.preferredHeight: 1
+                Layout.fillHeight: true
+                Layout.maximumHeight: Theme.windowMargin
             }
 
-            VPNLinkButton {
-                objectName: "privacyLink"
-                //% "Mozilla VPN Privacy Notice"
-                labelText: qsTrId("vpn.telemetryPolicy.MozillaVPNPrivacyNotice")
-                Layout.alignment: Qt.AlignHCenter
-                onClicked: VPN.openLink(VPN.LinkPrivacyNotice)
+            ColumnLayout {
+                spacing: 0
+                Layout.fillHeight: true
+
+                VPNSubtitle {
+                    //% "Learn more about what data Mozilla collects and how it’s used."
+                    text: qsTrId("vpn.telemetryPolicy.learnMoreAboutData")
+                    Layout.fillWidth: true
+                    width: undefined
+                }
+
+                VPNLinkButton {
+                    objectName: "privacyLink"
+                    //% "Mozilla VPN Privacy Notice"
+                    labelText: qsTrId("vpn.telemetryPolicy.MozillaVPNPrivacyNotice")
+                    onClicked: VPN.openLink(VPN.LinkPrivacyNotice)
+                    Layout.fillWidth: true
+                }
+
+                VPNVerticalSpacer {
+                    Layout.preferredHeight: Theme.windowMargin * 2
+                }
             }
 
         }
 
-        VPNVerticalSpacer {
-            Layout.fillWidth: true
-            height: Theme.windowMargin * 2
-        }
     }
+
+
 
     PropertyAnimation on opacity {
         id: fade
