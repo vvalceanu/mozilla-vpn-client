@@ -100,7 +100,7 @@ class MozillaVPN final : public QObject {
                  currentViewChanged)
 
  public:
-  MozillaVPN();
+  MozillaVPN(QObject* parent = nullptr);
   ~MozillaVPN();
 
   static MozillaVPN* instance();

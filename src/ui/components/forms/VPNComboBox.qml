@@ -3,17 +3,17 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import QtQuick 2.5
-import QtQuick.Controls 2.14
+import QtQuick.Controls 2.4
 import QtGraphicalEffects 1.0
-import QtQuick.Layouts 1.14
+import QtQuick.Layouts 1.11
 import Mozilla.VPN 1.0
 import "../../themes/themes.js" as Theme
 import "../"
 
 ComboBox {
     property var placeholderText: ""
+    property var selectedValue: ""
     textRole: "name"
-    valueRole: "value"
     id: combo
     Layout.preferredWidth: parent.width
     Layout.preferredHeight: Theme.rowHeight
@@ -53,6 +53,8 @@ ComboBox {
         height: Math.max(Theme.rowHeight, textItem.implicitHeight)
         padding: 0
         highlighted: combo.highlightedIndex === index
+
+        onClicked: selectedValue = value
 
         contentItem: Rectangle {
             anchors.fill: parent

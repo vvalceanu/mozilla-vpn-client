@@ -5,8 +5,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import QtQuick 2.5
 
-import QtQuick.Controls 2.14
-import QtQuick.Layouts 1.14
+import QtQuick.Controls 2.4
+import QtQuick.Layouts 1.11
 import Mozilla.VPN 1.0
 import "../components"
 import "../components/forms"
@@ -276,8 +276,8 @@ Item {
                         VPNButton {
                              //% "Submit"
                             text: qsTrId("vpn.feedbackform.submit")
-                            onClicked: feedbackRoot.sendFeedback(appRating, dropDown.currentValue, textArea.userEntry);
-                            enabled: dropDown.currentValue != null
+                            onClicked: feedbackRoot.sendFeedback(appRating, dropDown.selectedValue, textArea.userEntry);
+                            enabled: dropDown.currentIndex >= 0
                             opacity: enabled ? 1 : .5
                             Layout.preferredHeight: Theme.rowHeight
                             Layout.fillWidth: true
