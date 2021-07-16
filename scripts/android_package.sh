@@ -80,13 +80,6 @@ else
   print G no
 fi
 
-if ! [ -d "src" ] || ! [ -d "linux" ]; then
-  die "This script must be executed at the root of the repository."
-fi
-
-if ! [ -d "$QTPATH/android/bin/" ]; then
-  die "QTAndroid SDK was not found in the provided QT path"
-fi
 print Y "Checking Enviroment"
 if ! [ -d "src" ] || ! [ -d "linux" ]; then
   die "This script must be executed at the root of the repository."
