@@ -33,7 +33,9 @@
 #endif
 
 #ifdef MVPN_ANDROID
+#  include "platforms/android/iaphandler.h"
 #  include "platforms/android/androidutils.h"
+#  include "platforms/android/taskandroidproducts.h"
 #endif
 
 #ifdef MVPN_WINDOWS
@@ -141,6 +143,19 @@ MozillaVPN::MozillaVPN() : m_private(new Private()) {
           &ConnectionDataHolder::stateChanged);
 
 #ifdef MVPN_IOS
+  IAPHandler* iap = IAPHandler::createInstance();
+  connect(iap, &IAPHandler::subscriptionStarted, this,
+          &MozillaVPN::subscriptionStarted);
+  connect(iap, &IAPHandler::subscriptionFailed, this,
+          &MozillaVPN::subscriptionFailed);
+  connect(iap, &IAPHandler::subscriptionCanceled, this,
+          &MozillaVPN::subscriptionCanceled);
+  connect(iap, &IAPHandler::subscriptionCompleted, this,
+          &MozillaVPN::subscriptionCompleted);
+  connect(iap, &IAPHandler::alreadySubscribed, this,
+          &MozillaVPN::alreadySubscribed);
+#endif
+#ifdef MVPN_ANDROID
   IAPHandler* iap = IAPHandler::createInstance();
   connect(iap, &IAPHandler::subscriptionStarted, this,
           &MozillaVPN::subscriptionStarted);
@@ -273,6 +288,9 @@ void MozillaVPN::initialize() {
 
 #ifdef MVPN_IOS
   scheduleTask(new TaskIOSProducts());
+#endif
+#ifdef MVPN_ANDROID
+  scheduleTask(new TaskAndroidProducts());
 #endif
 
   setUserAuthenticated(true);
@@ -513,6 +531,13 @@ void MozillaVPN::authenticationCompleted(const QByteArray& json,
     return;
   }
 #endif
+#ifdef MVPN_ANDROID
+  if (m_private->m_user.subscriptionNeeded()) {
+    scheduleTask(new TaskAndroidProducts());
+    scheduleTask(new TaskFunction([this](MozillaVPN*) { maybeStateMain(); }));
+    return;
+  }
+#endif
 
   completeActivation();
 }
@@ -535,6 +560,9 @@ void MozillaVPN::completeActivation() {
 
 #ifdef MVPN_IOS
   scheduleTask(new TaskIOSProducts());
+#endif
+#ifdef MVPN_ANDROID
+  scheduleTask(new TaskAndroidProducts());
 #endif
 
   // Finally we are able to activate the client.
@@ -1165,10 +1193,86 @@ void MozillaVPN::subscriptionStarted(const QString& productIdentifier) {
 
   IAPHandler* iap = IAPHandler::instance();
 
-  // If IPA is not ready yet (race condition), let's register the products
+  // If IAP is not ready yet (race condition), let's register the products
   // again.
   if (!iap->hasProductsRegistered()) {
     scheduleTask(new TaskIOSProducts());
+    scheduleTask(new TaskFunction([productIdentifier](MozillaVPN* vpn) {
+      vpn->subscriptionStarted(productIdentifier);
+    }));
+
+    return;
+  }
+
+  iap->startSubscription(productIdentifier);
+}
+
+void MozillaVPN::subscriptionCompleted() {
+  if (m_state != StateSubscriptionValidation) {
+    logger.log() << "Random subscription completion received. Let's ignore it.";
+    return;
+  }
+
+  logger.log() << "Subscription completed";
+  completeActivation();
+}
+
+void MozillaVPN::subscriptionFailed() {
+  subscriptionFailedInternal(false /* canceled by user */);
+}
+
+void MozillaVPN::subscriptionCanceled() {
+  subscriptionFailedInternal(true /* canceled by user */);
+}
+
+void MozillaVPN::subscriptionFailedInternal(bool canceledByUser) {
+  if (m_state != StateSubscriptionValidation) {
+    logger.log() << "Random subscription failure received. Let's ignore it.";
+    return;
+  }
+
+  logger.log() << "Subscription failed or canceled";
+
+  // Let's go back to the subscription needed.
+  setState(StateSubscriptionNeeded);
+
+  if (!canceledByUser) {
+    errorHandle(ErrorHandler::SubscriptionFailureError);
+  }
+
+  scheduleTask(new TaskAccountAndServers());
+  scheduleTask(new TaskFunction([this](MozillaVPN*) {
+    if (!m_private->m_user.subscriptionNeeded() &&
+        m_state == StateSubscriptionNeeded) {
+      maybeStateMain();
+      return;
+    }
+  }));
+}
+
+void MozillaVPN::alreadySubscribed() {
+  if (m_state != StateSubscriptionValidation) {
+    logger.log()
+        << "Random already-subscribed notification received. Let's ignore it.";
+    return;
+  }
+
+  setState(StateSubscriptionBlocked);
+}
+#endif
+
+#ifdef MVPN_ANDROID
+void MozillaVPN::subscriptionStarted(const QString& productIdentifier) {
+  logger.log() << "ANDROID Subscription started" << productIdentifier;
+
+  setState(StateSubscriptionValidation);
+
+  IAPHandler* iap = IAPHandler::instance();
+
+  // If IAP is not ready yet (race condition), let's register the products
+  // again.
+  if (!iap->hasProductsRegistered()) {
+    scheduleTask(new TaskAndroidProducts());
     scheduleTask(new TaskFunction([productIdentifier](MozillaVPN* vpn) {
       vpn->subscriptionStarted(productIdentifier);
     }));

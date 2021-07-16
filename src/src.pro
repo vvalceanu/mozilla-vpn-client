@@ -499,6 +499,8 @@ else:android {
                 platforms/android/androidappimageprovider.cpp \
                 platforms/android/androidapplistprovider.cpp \
                 platforms/android/androidsharedprefs.cpp \
+                platforms/android/iaphandler.cpp \
+                platforms/android/taskandroidproducts.cpp \
                 tasks/authenticate/desktopauthenticationlistener.cpp
 
     HEADERS +=  platforms/android/androidauthenticationlistener.h \
@@ -511,6 +513,8 @@ else:android {
                 platforms/android/androidappimageprovider.h \
                 platforms/android/androidapplistprovider.h \
                 platforms/android/androidsharedprefs.h \
+                platforms/android/iaphandler.h \
+                platforms/android/taskandroidproducts.h \
                 tasks/authenticate/desktopauthenticationlistener.h
 
     # Usable Linux Imports

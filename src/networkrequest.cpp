@@ -343,6 +343,43 @@ NetworkRequest* NetworkRequest::createForIOSPurchase(QObject* parent,
 }
 #endif
 
+#ifdef MVPN_ANDROID
+NetworkRequest* NetworkRequest::createForAndroidProducts(QObject* parent) {
+  Q_ASSERT(parent);
+
+  NetworkRequest* r = new NetworkRequest(parent, 200, true);
+
+  QUrl url(Constants::API_URL);
+  url.setPath("/api/v2/vpn/products/android");
+  r->m_request.setUrl(url);
+
+  r->getRequest();
+  return r;
+}
+
+NetworkRequest* NetworkRequest::createForAndroidPurchase(
+    QObject* parent, const QString& receipt) {
+  Q_ASSERT(parent);
+
+  NetworkRequest* r = new NetworkRequest(parent, 201, true);
+  r->m_request.setHeader(QNetworkRequest::ContentTypeHeader,
+                         "application/json");
+
+  QUrl url(Constants::API_URL);
+  url.setPath("/api/v1/vpn/purchases/android");
+  r->m_request.setUrl(url);
+
+  QJsonObject obj;
+  obj.insert("token", QJsonValue(token));
+
+  QJsonDocument json;
+  json.setObject(obj);
+
+  r->postRequest(json.toJson(QJsonDocument::Compact));
+  return r;
+}
+#endif
+
 void NetworkRequest::replyFinished() {
   Q_ASSERT(m_reply);
   Q_ASSERT(m_reply->isFinished());

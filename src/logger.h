@@ -19,6 +19,9 @@ constexpr const char* LOG_SERVER = "server";
 #ifdef MVPN_IOS
 constexpr const char* LOG_IAP = "iap";
 #endif
+#ifdef MVPN_ANDROID
+constexpr const char* LOG_IAP = "iap-ANDROID";
+#endif
 
 #if defined(MVPN_LINUX) || defined(MVPN_ANDROID)
 constexpr const char* LOG_LINUX = "linux";

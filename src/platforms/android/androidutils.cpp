@@ -123,3 +123,9 @@ void AndroidUtils::abortAuthentication() {
   emit m_listener->abortedByUser();
   m_listener = nullptr;
 }
+
+QString AndroidUtils::IAPToken() {
+  logger.log() << "Returning IAP DUMMY TOKEN";
+
+  return "ITS THE TOKEN"
+}

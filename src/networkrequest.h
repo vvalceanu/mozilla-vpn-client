@@ -66,6 +66,12 @@ class NetworkRequest final : public QObject {
   static NetworkRequest* createForIOSPurchase(QObject* parent,
                                               const QString& receipt);
 #endif
+#ifdef MVPN_ANDROID
+  static NetworkRequest* createForAndroidProducts(QObject* parent);
+
+  static NetworkRequest* createForAndroidPurchase(QObject* parent,
+                                                  const QString& receipt);
+#endif
 
   void disableTimeout();
 
