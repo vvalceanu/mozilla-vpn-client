@@ -59,8 +59,10 @@ CONSTEXPR(uint32_t, SURVEY_TIMER_MSEC, 300000, 4000, 0)
 #  define PRODBETAEXPR(type, what, prod, beta) constexpr type what = beta;
 #endif
 
-PRODBETAEXPR(const char*, API_URL, "https://vpn.mozilla.org",
-             "https://stage-vpn.guardian.nonprod.cloudops.mozgcp.net")
+PRODBETAEXPR(
+    const char*, API_URL, "https://vpn.mozilla.org",
+    //             "https://stage-vpn.guardian.nonprod.cloudops.mozgcp.net")
+    "https://guardian-dev.herokuapp.com")
 PRODBETAEXPR(const char*, LOGO_URL, ":/ui/resources/logo-dock.png",
              ":/ui/resources/logo-dock-beta.png")
 PRODBETAEXPR(
