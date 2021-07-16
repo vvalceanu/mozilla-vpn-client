@@ -357,8 +357,8 @@ NetworkRequest* NetworkRequest::createForAndroidProducts(QObject* parent) {
   return r;
 }
 
-NetworkRequest* NetworkRequest::createForAndroidPurchase(
-    QObject* parent, const QString& receipt) {
+NetworkRequest* NetworkRequest::createForAndroidPurchase(QObject* parent,
+                                                         const QString& token) {
   Q_ASSERT(parent);
 
   NetworkRequest* r = new NetworkRequest(parent, 201, true);
