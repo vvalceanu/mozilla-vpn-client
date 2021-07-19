@@ -127,5 +127,5 @@ void AndroidUtils::abortAuthentication() {
 QString AndroidUtils::IAPToken() {
   logger.log() << "Returning IAP DUMMY TOKEN";
 
-  return "ITS THE TOKEN"
+  return "ITS THE TOKEN";
 }

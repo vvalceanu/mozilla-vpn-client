@@ -275,6 +275,14 @@ class MozillaVPN final : public QObject {
   void subscriptionFailedInternal(bool canceledByUser);
   void alreadySubscribed();
 #endif
+#ifdef MVPN_ANDROID
+  void subscriptionStarted(const QString& productIdentifier);
+  void subscriptionCompleted();
+  void subscriptionFailed();
+  void subscriptionCanceled();
+  void subscriptionFailedInternal(bool canceledByUser);
+  void alreadySubscribed();
+#endif
 
   void completeActivation();
 
