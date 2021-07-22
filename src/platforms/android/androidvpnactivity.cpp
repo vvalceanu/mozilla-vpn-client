@@ -13,7 +13,7 @@
 
 namespace {
 AndroidVPNActivity* instance = nullptr;
-constexpr auto CLASSNAME = "org.mozilla.firefox.vpn.qt.VPNActivity";
+constexpr auto CLASSNAME = "org.mozilla.sarah.vpn.qt.VPNActivity";
 }  // namespace
 
 AndroidVPNActivity::AndroidVPNActivity() {

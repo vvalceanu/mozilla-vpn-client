@@ -50,7 +50,7 @@ Logger logger(LOG_ANDROID, "AndroidController");
 AndroidController* s_instance = nullptr;
 
 constexpr auto PERMISSIONHELPER_CLASS =
-    "org/mozilla/firefox/vpn/qt/VPNPermissionHelper";
+    "org/mozilla/sarah/vpn/qt/VPNPermissionHelper";
 
 }  // namespace
 
@@ -90,12 +90,12 @@ void AndroidController::initialize(const Device* device, const Keys* keys) {
       "getApplicationContext", "()Landroid/content/Context;");
 
   QAndroidJniObject::callStaticMethod<void>(
-      "org/mozilla/firefox/vpn/VPNService", "startService",
+      "org/mozilla/sarah/vpn/VPNService", "startService",
       "(Landroid/content/Context;)V", appContext.object());
 
   // Start the VPN Service (if not yet) and Bind to it
   QtAndroid::bindService(
-      QAndroidIntent(appContext.object(), "org.mozilla.firefox.vpn.VPNService"),
+      QAndroidIntent(appContext.object(), "org.mozilla.sarah.vpn.VPNService"),
       *this, QtAndroid::BindFlag::AutoCreate);
 }
 

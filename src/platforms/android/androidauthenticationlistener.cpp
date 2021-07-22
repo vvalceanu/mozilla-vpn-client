@@ -37,7 +37,7 @@ void AndroidAuthenticationListener::start(MozillaVPN* vpn, QUrl& url,
 
   QAndroidJniObject activity = QtAndroid::androidActivity();
   jboolean supported = QAndroidJniObject::callStaticMethod<jboolean>(
-      "org/mozilla/firefox/vpn/qt/PackageManagerHelper", "isWebViewSupported",
+      "org/mozilla/sarah/vpn/qt/PackageManagerHelper", "isWebViewSupported",
       "(Landroid/content/Context;)Z", activity.object());
   if (supported) {
     AndroidUtils::instance()->startAuthentication(this, url);

@@ -12,7 +12,7 @@ buildscript {
         jsr305Version = '3.0.2'
         streamsupportVersion = '1.7.0'
         threetenabpVersion = '1.1.1'
-        groupName = 'org.mozilla.firefox.vpn'
+        groupName = 'org.mozilla.sarah.vpn'
     }
     repositories {
         google()

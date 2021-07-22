@@ -4,7 +4,7 @@ This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 -->
-<manifest package="org.mozilla.firefox.vpn" xmlns:android="http://schemas.android.com/apk/res/android" android:versionName="-- %%INSERT_VERSION_NAME%% --" android:versionCode="-- %%INSERT_VERSION_CODE%% --" android:installLocation="auto">
+<manifest package="org.mozilla.sarah.vpn" xmlns:android="http://schemas.android.com/apk/res/android" android:versionName="-- %%INSERT_VERSION_NAME%% --" android:versionCode="-- %%INSERT_VERSION_CODE%% --" android:installLocation="auto">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -28,7 +28,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
         android:icon="@mipmap/vpnicon">
         <activity
             android:configChanges="orientation|uiMode|screenLayout|screenSize|smallestScreenSize|layoutDirection|locale|fontScale|keyboard|keyboardHidden|navigation|mcc|mnc|density"
-            android:name="org.mozilla.firefox.vpn.qt.VPNActivity"
+            android:name="org.mozilla.sarah.vpn.qt.VPNActivity"
             android:process=":QtOnlyProcess"
             android:label="Mozilla VPN"
             android:screenOrientation="portrait"
@@ -109,7 +109,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
                 <action android:name="android.net.VpnService"/>
             </intent-filter>
         </service>
-        <service android:name="org.mozilla.firefox.vpn.qt.VPNPermissionHelper"
+        <service android:name="org.mozilla.sarah.vpn.qt.VPNPermissionHelper"
             android:process=":QtOnlyProcess"
             android:permission="android.permission.BIND_VPN_SERVICE">
         </service>

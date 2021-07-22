@@ -21,7 +21,7 @@ namespace {
 Logger logger(LOG_ANDROID, "AndroidWebView");
 bool s_methodsInitialized = false;
 AndroidWebView* s_instance = nullptr;
-constexpr auto WEBVIEW_CLASS = "org/mozilla/firefox/vpn/qt/VPNWebView";
+constexpr auto WEBVIEW_CLASS = "org/mozilla/sarah/vpn/qt/VPNWebView";
 }  // namespace
 
 // static

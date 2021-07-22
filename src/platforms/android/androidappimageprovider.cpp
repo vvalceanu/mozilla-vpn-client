@@ -38,7 +38,7 @@ QImage AndroidAppImageProvider::requestImage(const QString& id, QSize* size,
   logger.log() << " Request image";
 
   QAndroidJniObject drawable = QAndroidJniObject::callStaticObjectMethod(
-      "org/mozilla/firefox/vpn/qt/PackageManagerHelper", "getAppIcon",
+      "org/mozilla/sarah/vpn/qt/PackageManagerHelper", "getAppIcon",
       "(Landroid/content/Context;Ljava/lang/String;)Landroid/graphics/drawable/"
       "Drawable;",
       activity.object(), jniString.object());

@@ -80,7 +80,7 @@ void IAPHandler::registerProducts(const QByteArray& data) {
   auto jniString = QAndroidJniObject::fromString("PRODUCTID");
 
   QAndroidJniObject::callStaticMethod<void>(
-      "org/mozilla/firefox/vpn/InAppPurchase", "startBillingClient",
+      "org/mozilla/sarah/vpn/InAppPurchase", "startBillingClient",
       "(Landroid/content/Context;Ljava/lang/String;)V", appContext.object(),
       jniString.object());
 }

@@ -23,9 +23,9 @@
 namespace {
 Logger logger(LOG_ANDROID, "AndroidDataMigration");
 #ifdef QT_DEBUG
-const QString MIGRATION_FILE = "org.mozilla.firefox.vpn.debug_preferences.xml";
+const QString MIGRATION_FILE = "org.mozilla.sarah.vpn.debug_preferences.xml";
 #else
-const QString MIGRATION_FILE = "org.mozilla.firefox.vpn_preferences.xml";
+const QString MIGRATION_FILE = "org.mozilla.sarah.vpn_preferences.xml";
 #endif
 
 }  // namespace

@@ -16,10 +16,10 @@ Logger logger(LOG_ANDROID, "AndroidSharedPrefs");
 
 #ifdef QT_DEBUG
 const QString SHARED_PREF_FOLDER =
-    "/data/data/org.mozilla.firefox.vpn.debug/shared_prefs";
+    "/data/data/org.mozilla.sarah.vpn.debug/shared_prefs";
 #else
 const QString SHARED_PREF_FOLDER =
-    "/data/data/org.mozilla.firefox.vpn/shared_prefs";
+    "/data/data/org.mozilla.sarah.vpn/shared_prefs";
 #endif
 }  // namespace
 
