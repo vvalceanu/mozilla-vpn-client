@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.mozilla.firefox.vpn.qt;
+package org.mozilla.sarah.vpn.qt;
 
 import android.Manifest;
 import android.content.Context;
@@ -90,8 +90,8 @@ public class PackageManagerHelper {
     return false;
   }
   private static boolean isSelf(PackageInfo pkgInfo) {
-    return pkgInfo.packageName.equals("org.mozilla.firefox.vpn")
-        || pkgInfo.packageName.equals("org.mozilla.firefox.vpn.debug");
+    return pkgInfo.packageName.equals("org.mozilla.sarah.vpn")
+        || pkgInfo.packageName.equals("org.mozilla.sarah.vpn.debug");
   }
   private static boolean usesInternet(PackageInfo pkgInfo){
     if(pkgInfo.requestedPermissions == null){

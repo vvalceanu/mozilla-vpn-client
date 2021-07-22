@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.mozilla.firefox.vpn
+package org.mozilla.sarah.vpn
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -96,13 +96,13 @@ object NotificationUtil {
         val header = "" + prefs.getString("fallbackNotificationHeader", "Mozilla VPN")
 
         // Create the Intent that Should be Fired if the User Clicks the notification
-        val mainActivityName = "org.mozilla.firefox.vpn.qt.VPNActivity"
+        val mainActivityName = "org.mozilla.sarah.vpn.qt.VPNActivity"
         val activity = Class.forName(mainActivityName)
         val intent = Intent(service, activity)
         val pendingIntent = PendingIntent.getActivity(service, 0, intent, 0)
         // Build our notification
         sNotificationBuilder?.let {
-            it.setSmallIcon(org.mozilla.firefox.vpn.R.drawable.ic_mozvpn_round)
+            it.setSmallIcon(org.mozilla.sarah.vpn.R.drawable.ic_mozvpn_round)
                 .setContentTitle(header)
                 .setContentText(message)
                 .setOnlyAlertOnce(true)
