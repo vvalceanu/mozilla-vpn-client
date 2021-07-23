@@ -56,6 +56,17 @@ NetworkRequest::~NetworkRequest() { MVPN_COUNT_DTOR(NetworkRequest); }
 QString NetworkRequest::apiBaseUrl() { return QString(Constants::API_URL); }
 
 // static
+NetworkRequest* NetworkRequest::createForGetUrl(QObject* parent,
+                                                const QString& url,
+                                                int status) {
+  Q_ASSERT(parent);
+
+  NetworkRequest* r = new NetworkRequest(parent, 200, false);
+  createDummyRequest(r);
+  return r;
+}
+
+// static
 NetworkRequest* NetworkRequest::createForAuthenticationVerification(
     QObject* parent, const QString&, const QString&) {
   Q_ASSERT(parent);

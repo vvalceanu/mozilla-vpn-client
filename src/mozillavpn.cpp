@@ -1304,6 +1304,21 @@ void MozillaVPN::heartbeatCompleted(bool success) {
 void MozillaVPN::triggerHeartbeat() { scheduleTask(new TaskHeartbeat()); }
 
 void MozillaVPN::addCurrentDeviceAndRefreshData() {
-  scheduleTask(new TaskAddDevice(Device::currentDeviceName()));
+  logger.log() << "Generating keypair";
+
+  QPair<QByteArray, QByteArray> keypair = TaskAddDevice::generateKeypair();
+
+#ifdef QT_DEBUG
+  logger.log() << "Private key: " << keypair.first;
+#endif
+  logger.log() << "Public key: " << keypair.second;
+
+  Task* taskDevice =
+      new TaskAddDevice(Device::currentDeviceName(), keypair.second);
+  connect(taskDevice, &Task::completed, [this, keypair] {
+    deviceAdded(Device::currentDeviceName(), keypair.second, keypair.first);
+  });
+
+  scheduleTask(taskDevice);
   scheduleTask(new TaskAccountAndServers());
 }

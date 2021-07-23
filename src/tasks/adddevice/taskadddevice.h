@@ -7,19 +7,23 @@
 
 #include "task.h"
 
+#include <QByteArray>
 #include <QObject>
 
 class TaskAddDevice final : public Task {
   Q_DISABLE_COPY_MOVE(TaskAddDevice)
 
  public:
-  explicit TaskAddDevice(const QString& deviceName);
+  explicit TaskAddDevice(const QString& deviceName, const QString& pubkey);
   ~TaskAddDevice();
 
   void run(MozillaVPN* vpn) override;
 
+  static QPair<QByteArray, QByteArray> generateKeypair();
+
  private:
   QString m_deviceName;
+  QString m_publicKey;
 };
 
 #endif  // TASKADDDEVICE_H

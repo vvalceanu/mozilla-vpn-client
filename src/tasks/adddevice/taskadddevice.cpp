@@ -13,45 +13,19 @@
 #include <QRandomGenerator>
 
 namespace {
-
 Logger logger(LOG_MAIN, "TaskAddDevice");
-
-QByteArray generatePrivateKey() {
-  QByteArray key;
-
-  QRandomGenerator* generator = QRandomGenerator::system();
-  Q_ASSERT(generator);
-
-  for (uint8_t i = 0; i < CURVE25519_KEY_SIZE; ++i) {
-    quint32 v = generator->generate();
-    key.append(v & 0xFF);
-  }
-
-  return key.toBase64();
 }
 
-}  // anonymous namespace
-
-TaskAddDevice::TaskAddDevice(const QString& deviceName)
-    : Task("TaskAddDevice"), m_deviceName(deviceName) {
+TaskAddDevice::TaskAddDevice(const QString& deviceName, const QString& pubkey)
+    : Task("TaskAddDevice"), m_deviceName(deviceName), m_publicKey(pubkey) {
   MVPN_COUNT_CTOR(TaskAddDevice);
 }
 
 TaskAddDevice::~TaskAddDevice() { MVPN_COUNT_DTOR(TaskAddDevice); }
 
 void TaskAddDevice::run(MozillaVPN* vpn) {
-  logger.log() << "Adding the device" << m_deviceName;
-
-  QByteArray privateKey = generatePrivateKey();
-  QByteArray publicKey = Curve25519::generatePublicKey(privateKey);
-
-#ifdef QT_DEBUG
-  logger.log() << "Private key: " << privateKey;
-  logger.log() << "Public key: " << publicKey;
-#endif
-
   NetworkRequest* request =
-      NetworkRequest::createForDeviceCreation(this, m_deviceName, publicKey);
+      NetworkRequest::createForDeviceCreation(this, m_deviceName, m_publicKey);
 
   connect(request, &NetworkRequest::requestFailed,
           [this, vpn](QNetworkReply::NetworkError error, const QByteArray&) {
@@ -61,9 +35,25 @@ void TaskAddDevice::run(MozillaVPN* vpn) {
           });
 
   connect(request, &NetworkRequest::requestCompleted,
-          [this, vpn, publicKey, privateKey](const QByteArray&) {
-            logger.log() << "Device added";
-            vpn->deviceAdded(m_deviceName, publicKey, privateKey);
+          [this](const QByteArray&) {
+            logger.log() << "Added device:" << m_deviceName;
             emit completed();
           });
+}
+
+// static
+QPair<QByteArray, QByteArray> TaskAddDevice::generateKeypair() {
+  QByteArray keyBytes;
+
+  QRandomGenerator* generator = QRandomGenerator::system();
+  Q_ASSERT(generator);
+
+  for (uint8_t i = 0; i < CURVE25519_KEY_SIZE; ++i) {
+    quint32 v = generator->generate();
+    keyBytes.append(v & 0xFF);
+  }
+
+  QByteArray privateKey = keyBytes.toBase64();
+  QByteArray publicKey = Curve25519::generatePublicKey(privateKey);
+  return QPair<QByteArray, QByteArray>(privateKey, publicKey);
 }
