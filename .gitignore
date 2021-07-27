@@ -41,6 +41,7 @@ android/*/.cxx/
 !android/*/*/Makefile 
 xcode.xconfig
 .gradle/
+.gradle_cache/
 
 *.ts
 tests/unit/tests
