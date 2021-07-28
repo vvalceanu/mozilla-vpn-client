@@ -32,6 +32,13 @@ MOC_DIR = .moc
 RCC_DIR = .rcc
 UI_DIR = .ui
 
+CCACHE_BIN = $$system(which ccache)
+!isEmpty(CCACHE_BIN) {
+    message(Using ccache)
+    load(ccache)
+    QMAKE_CXXFLAGS +=-g -fdebug-prefix-map=$(shell pwd)=.
+}
+
 SOURCES += \
         apppermission.cpp \
         authenticationlistener.cpp \
@@ -485,7 +492,7 @@ else:android {
 
     DEFINES += MVPN_ANDROID
 
-    ANDROID_ABIS = x86 x86_64 armeabi-v7a arm64-v8a
+    ANDROID_ABIS = x86 x86_64 # armeabi-v7a arm64-v8a
 
     INCLUDEPATH += platforms/android
 

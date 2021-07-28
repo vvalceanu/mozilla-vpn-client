@@ -83,6 +83,8 @@ void IAPHandler::registerProducts(const QByteArray& data) {
       "org/mozilla/sarah/vpn/InAppPurchase", "startBillingClient",
       "(Landroid/content/Context;Ljava/lang/String;)V", appContext.object(),
       jniString.object());
+
+  emit productsRegistered();
 }
 
 void IAPHandler::addProduct(const QJsonValue& value) {

@@ -143,8 +143,8 @@ android {
         resConfig "en"
         minSdkVersion 24
         targetSdkVersion 30
-        versionCode  3 //System.getenv("VERSIONCODE").toInteger()
-        versionName  "3" //System.getenv("SHORTVERSION")
+        versionCode  5 //System.getenv("VERSIONCODE").toInteger()
+        versionName  "5" //System.getenv("SHORTVERSION")
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8

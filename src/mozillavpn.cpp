@@ -290,10 +290,13 @@ void MozillaVPN::initialize() {
   scheduleTask(new TaskIOSProducts());
 #endif
 #ifdef MVPN_ANDROID
+  logger.log() << "scheduling";
   scheduleTask(new TaskAndroidProducts());
+  maybeStateMain();
 #endif
-
+  logger.log() << "set user true";
   setUserAuthenticated(true);
+  logger.log() << "call state main";
   maybeStateMain();
 }
 
@@ -314,7 +317,7 @@ void MozillaVPN::setState(State state) {
 void MozillaVPN::maybeStateMain() {
   logger.log() << "Maybe state main";
 
-#ifdef MVPN_IOS
+#if defined(MVPN_ANDROID) || defined(MVPN_IOS)
   if (m_private->m_user.subscriptionNeeded()) {
     setState(StateSubscriptionNeeded);
     return;
@@ -532,9 +535,13 @@ void MozillaVPN::authenticationCompleted(const QByteArray& json,
   }
 #endif
 #ifdef MVPN_ANDROID
+  logger.log() << "subNeeded = " << m_private->m_user.subscriptionNeeded();
   if (m_private->m_user.subscriptionNeeded()) {
     scheduleTask(new TaskAndroidProducts());
-    scheduleTask(new TaskFunction([this](MozillaVPN*) { maybeStateMain(); }));
+    scheduleTask(new TaskFunction([this](MozillaVPN*) {
+      logger.log() << "I'M HERE";
+      maybeStateMain();
+    }));
     return;
   }
 #endif
@@ -701,7 +708,7 @@ void MozillaVPN::accountChecked(const QByteArray& json) {
   m_private->m_user.writeSettings();
   m_private->m_deviceModel.writeSettings();
 
-#ifdef MVPN_IOS
+#if defined(MVPN_IOS) || defined(MVPN_ANDROID)
   if (m_private->m_user.subscriptionNeeded() && m_state == StateMain) {
     maybeStateMain();
     return;

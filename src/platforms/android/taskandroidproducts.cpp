@@ -35,11 +35,11 @@ void TaskAndroidProducts::run(MozillaVPN* vpn) {
           [this](const QByteArray& data) {
             logger.log() << "Android product request completed" << data;
 
-            IAPHandler* ipaHandler = IAPHandler::instance();
-            Q_ASSERT(ipaHandler);
+            IAPHandler* iapHandler = IAPHandler::instance();
+            Q_ASSERT(iapHandler);
 
-            connect(ipaHandler, &IAPHandler::productsRegistered, this,
+            connect(iapHandler, &IAPHandler::productsRegistered, this,
                     &TaskAndroidProducts::completed);
-            ipaHandler->registerProducts(data);
+            iapHandler->registerProducts(data);
           });
 }
