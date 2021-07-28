@@ -59,10 +59,20 @@ class VPNActivity : QtActivity() {
                                     Log.v(TAG, details.priceCurrencyCode)
                                     put(details.sku, details)
                                 }
+                                val skuDetails = skuDetailsList[0]
+                                val billingParams = BillingFlowParams.newBuilder()
+                                    .setSkuDetails(skuDetails)
+                                    .build()
+                                /* THIS IS WHERE THE LAUNCH HAPPENS */
+                                val billingResult = billingClient.launchBillingFlow(this@VPNActivity, billingParams);
+                                val responseCode = billingResult.responseCode
+                                val debugMessage = billingResult.debugMessage
+                                Log.d(TAG, "launchBillingFlow: BillingResponse $responseCode $debugMessage")
                             }.also { postedValue ->
                                 val skuDetailsCount = postedValue.size
                                 if (skuDetailsCount == expectedSkuDetailsCount) {
                                     Log.i(TAG, "onSkuDetailsResponse: Found ${skuDetailsCount} SkuDetails")
+                                    /*
                                     val skuDetails = skusWithSkuDetails.value?.get("org.mozilla.sarah.vpn.monthly") ?: run {
                                         Log.e(TAG, "Could not find sku to make purchase")
                                         return
@@ -70,11 +80,12 @@ class VPNActivity : QtActivity() {
                                     val billingParams = BillingFlowParams.newBuilder()
                                         .setSkuDetails(skuDetails)
                                         .build()
-                                    /* THIS IS WHERE THE LAUNCH HAPPENS */
+
                                     val billingResult = billingClient.launchBillingFlow(this@VPNActivity, billingParams);
                                     val responseCode = billingResult.responseCode
                                     val debugMessage = billingResult.debugMessage
                                     Log.d(TAG, "launchBillingFlow: BillingResponse $responseCode $debugMessage")
+                                    */
                                 } else {
                                     Log.e(TAG, "onSkuDetailsResponse: " +
                                             "Expected ${expectedSkuDetailsCount}, " +
