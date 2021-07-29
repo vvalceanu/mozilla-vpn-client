@@ -42,13 +42,6 @@ MOC_DIR = .moc
 RCC_DIR = .rcc
 UI_DIR = .ui
 
-CCACHE_BIN = $$system(which ccache)
-!isEmpty(CCACHE_BIN) {
-    message(Using ccache)
-    load(ccache)
-    QMAKE_CXXFLAGS +=-g -fdebug-prefix-map=$(shell pwd)=.
-}
-
 SOURCES += \
         apppermission.cpp \
         authenticationlistener.cpp \
