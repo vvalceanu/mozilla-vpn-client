@@ -22,8 +22,8 @@ Item {
         id: menu
         objectName: "settingsAdvancedDNSSettingsBackButton"
 
-        //% "Advanced DNS Settings"
-        title: qsTrId("vpn.settings.advancedDNSSettings.title")
+        //% "Advanced DNS settings"
+        title: qsTrId("vpn.settings.advancedDNSSettings.title2")
         isSettingsView: true
     }
 
@@ -139,7 +139,8 @@ Item {
 
                     Layout.fillWidth: true
                     Layout.leftMargin: 40
-                    placeholderText: VPNSettings.userDNS
+                    placeholderText: VPNSettings.placeholderUserDNS
+                    text: VPNSettings.userDNS
                     enabled: !VPNSettings.useGatewayDNS
                     opacity: enabled ? 1 : .5
 
@@ -170,12 +171,6 @@ Item {
                             ipInput.valueInvalid = true;
                             break;
 
-                        case VPNSettings.UserDNSNotIPv4:
-                            //% "We currently support only IPv4 IP addresses"
-                            ipInput.error = qsTrId("vpn.settings.userDNS.notIPv4")
-                            ipInput.valueInvalid = true;
-                            break;
-
                         case VPNSettings.UserDNSOutOfRange:
                             //% "Out of range IP address"
                             ipInput.error = qsTrId("vpn.settings.userDNS.outOfRange")
@@ -191,7 +186,10 @@ Item {
                     anchors.right: undefined
                     anchors.leftMargin: undefined
                     anchors.rightMargin: undefined
+                    anchors.top: undefined
+                    anchors.topMargin: undefined
                     Layout.leftMargin: ipInput.Layout.leftMargin
+                    alertColor: Theme.red
 
                     states: [
                         State {

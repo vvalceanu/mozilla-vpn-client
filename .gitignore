@@ -21,8 +21,6 @@ dbus_adaptor.*
 dbus_interface.*
 mozillavpn-daemon
 *_plugin_import.cpp
-translations/*.qm
-translations/*.pri
 linux/netfilter/netfilter.[ah]
 linux/netfilter/vendor/
 .qm
@@ -41,10 +39,12 @@ android/*/.cxx/
 !android/*/*/Makefile 
 xcode.xconfig
 .gradle/
+.gradle_cache/
 
 *.ts
 tests/unit/tests
 tests/nativemessaging/tests
+tests/proxy/__pycache__/
 build
 Debug/
 !android/src/debug/
@@ -59,6 +59,7 @@ macos/gobridge/wireguard-go-version.h
 .vscode/
 MozillaVPN.xcodeproj/
 MozillaVPN.vcxproj*
+*.autosave
 
 #Windows 
 .deps
@@ -68,6 +69,9 @@ tunnel.dll
 tunnel.h
 *.wixobj
 *.msm
+*.dll
+.vs/
+*.msi
 MozillaVPN.exe
 MozillaVPN.exp
 MozillaVPN.lib
@@ -76,6 +80,9 @@ mozillavpnnp.exe
 mozillavpnnp.vcxproj*
 windows/installer/x64/
 windows/tunnel/x64/
+windows/split-tunnel/*
+!windows/split-tunnel/get.ps1
+
 
 # WASM
 mozillavpn.js
@@ -94,3 +101,12 @@ mozillavpnnp.vcxproj*
 
 # For users compiling QT per the README
 /qt/
+
+# Language files
+translations/*/*.ts
+translations/*/*.qm
+translations/*/locversion.plist
+translations/*.pri
+translations/generated/*.cpp
+translations/generated/*.h
+macos/pkg/Resources/*.lproj

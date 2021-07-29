@@ -9,7 +9,7 @@ const vpn = require('./helper.js');
 const exec = util.promisify(require('child_process').exec);
 
 describe('Connectivity', function() {
-  this.timeout(500000);
+  this.timeout(300000);
 
   before(async () => {
     await vpn.connect();
@@ -70,7 +70,7 @@ describe('Connectivity', function() {
           'VPN is on';
     });
 
-    assert((await vpn.getElementProperty('controllerSubTitle', 'text'))
+    assert((await vpn.getElementProperty('secureAndPrivateSubtitle', 'text'))
                .startsWith('Secure and private '));
 
     await vpn.waitForCondition(() => {

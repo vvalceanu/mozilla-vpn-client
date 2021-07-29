@@ -4,6 +4,7 @@
 
 #include "mozillavpn.h"
 #include "constants.h"
+#include "featurelist.h"
 #include "gleansample.h"
 #include "leakdetector.h"
 #include "logger.h"
@@ -12,6 +13,7 @@
 #include "models/device.h"
 #include "models/servercountrymodel.h"
 #include "models/user.h"
+#include "networkrequest.h"
 #include "qmlengineholder.h"
 #include "settingsholder.h"
 #include "tasks/accountandservers/taskaccountandservers.h"
@@ -372,25 +374,34 @@ void MozillaVPN::getStarted() {
   authenticate();
 }
 
-void MozillaVPN::authenticate() {
+void MozillaVPN::authenticate(
+    MozillaVPN::AuthenticationType authenticationType) {
   logger.log() << "Authenticate";
 
   setState(StateAuthenticating);
 
   hideAlert();
 
+  if (authenticationType == DefaultAuthentication) {
+    authenticationType = FeatureList::instance()->authenticationInApp()
+                             ? AuthenticationInApp
+                             : AuthenticationInBrowser;
+  }
+
   if (m_userAuthenticated) {
     LogoutObserver* lo = new LogoutObserver(this);
     // Let's use QueuedConnection to avoid nexted tasks executions.
-    connect(lo, &LogoutObserver::ready, this, &MozillaVPN::authenticate,
-            Qt::QueuedConnection);
+    connect(
+        lo, &LogoutObserver::ready, this,
+        [&] { authenticate(authenticationType); }, Qt::QueuedConnection);
     return;
   }
 
   emit triggerGleanSample(GleanSample::authenticationStarted);
 
   scheduleTask(new TaskHeartbeat());
-  scheduleTask(new TaskAuthenticate());
+
+  scheduleTask(new TaskAuthenticate(authenticationType));
 }
 
 void MozillaVPN::abortAuthentication() {
@@ -409,23 +420,23 @@ void MozillaVPN::openLink(LinkType linkType) {
 
   switch (linkType) {
     case LinkAccount:
-      url = Constants::API_URL;
+      url = NetworkRequest::apiBaseUrl();
       url.append("/r/vpn/account");
       addEmailAddress = true;
       break;
 
     case LinkContact:
-      url = Constants::API_URL;
+      url = NetworkRequest::apiBaseUrl();
       url.append("/r/vpn/contact");
       break;
 
     case LinkFeedback:
-      url = Constants::API_URL;
+      url = NetworkRequest::apiBaseUrl();
       url.append("/r/vpn/client/feedback");
       break;
 
     case LinkHelpSupport:
-      url = Constants::API_URL;
+      url = NetworkRequest::apiBaseUrl();
       url.append("/r/vpn/support");
       break;
 
@@ -436,23 +447,23 @@ void MozillaVPN::openLink(LinkType linkType) {
       break;
 
     case LinkTermsOfService:
-      url = Constants::API_URL;
+      url = NetworkRequest::apiBaseUrl();
       url.append("/r/vpn/terms");
       break;
 
     case LinkPrivacyNotice:
-      url = Constants::API_URL;
+      url = NetworkRequest::apiBaseUrl();
       url.append("/r/vpn/privacy");
       break;
 
     case LinkUpdate:
-      url = Constants::API_URL;
+      url = NetworkRequest::apiBaseUrl();
       url.append("/r/vpn/update/");
       url.append(Constants::PLATFORM_NAME);
       break;
 
     case LinkSubscriptionBlocked:
-      url = Constants::API_URL;
+      url = NetworkRequest::apiBaseUrl();
       url.append("/r/vpn/subscriptionBlocked");
       break;
 
@@ -834,9 +845,7 @@ void MozillaVPN::errorHandle(ErrorHandler::ErrorType error) {
       break;
 
     case ErrorHandler::AuthenticationError:
-      if (m_userAuthenticated) {
-        alert = AuthenticationFailedAlert;
-      }
+      alert = AuthenticationFailedAlert;
       break;
 
     case ErrorHandler::ControllerError:
