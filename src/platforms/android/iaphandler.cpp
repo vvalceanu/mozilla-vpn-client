@@ -77,7 +77,7 @@ void IAPHandler::registerProducts(const QByteArray& data) {
 
   auto appContext = QtAndroid::androidActivity().callObjectMethod(
       "getApplicationContext", "()Landroid/content/Context;");
-  auto jniString = QAndroidJniObject::fromString("PRODUCTID");
+  auto jniString = QAndroidJniObject::fromString(data);
 
   QAndroidJniObject::callStaticMethod<void>(
       "org/mozilla/sarah/vpn/InAppPurchase", "startBillingClient",

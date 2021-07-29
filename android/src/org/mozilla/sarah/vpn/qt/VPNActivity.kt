@@ -12,15 +12,6 @@ import com.android.billingclient.api.*
 
 class VPNActivity : QtActivity() {
 
-    private val TAG = "VPNActivity"
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        Log.v(TAG, "onCreate A")
-        super.onCreate(savedInstanceState)
-        Log.v(TAG, "onCreate B")
-
-    }
-
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK && event.repeatCount == 0) {
             onBackPressed()
