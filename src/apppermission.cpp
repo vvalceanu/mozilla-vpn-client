@@ -15,13 +15,9 @@
 #  include "platforms/android/androidapplistprovider.h"
 #elif defined(MVPN_LINUX)
 #  include "platforms/linux/linuxapplistprovider.h"
-#elif defined(MVPN_WINDOWS)
-#  include "platforms/windows/windowsapplistprovider.h"
 #else
 #  include "platforms/dummy/dummyapplistprovider.h"
 #endif
-
-#include <QFileDialog>
 
 namespace {
 Logger logger(LOG_MAIN, "AppPermission");
@@ -38,8 +34,6 @@ AppPermission::AppPermission(QObject* parent) : QAbstractListModel(parent) {
       new AndroidAppListProvider(this);
 #elif defined(MVPN_LINUX)
       new LinuxAppListProvider(this);
-#elif defined(MVPN_WINDOWS)
-      new WindowsAppListProvider(this);
 #else
       new DummyAppListProvider(this);
 #endif
@@ -93,7 +87,7 @@ QVariant AppPermission::data(const QModelIndex& index, int role) const {
   }
 }
 
-void AppPermission::flip(const QString& appID) {
+Q_INVOKABLE void AppPermission::flip(const QString& appID) {
   SettingsHolder* settingsHolder = SettingsHolder::instance();
   if (settingsHolder->hasVpnDisabledApp(appID)) {
     logger.log() << "Enabled --" << appID << " for VPN";
@@ -107,7 +101,7 @@ void AppPermission::flip(const QString& appID) {
   dataChanged(createIndex(index, 0), createIndex(index, 0));
 }
 
-void AppPermission::requestApplist() {
+Q_INVOKABLE void AppPermission::requestApplist() {
   logger.log() << "Request new AppList";
   m_listprovider->getApplicationList();
 }
@@ -117,16 +111,10 @@ void AppPermission::receiveAppList(const QMap<QString, QString>& applist) {
   if (!m_applist.isEmpty()) {
     // Check the Disabled-List
     SettingsHolder* settingsHolder = SettingsHolder::instance();
-    foreach (QString blockedAppId, settingsHolder->vpnDisabledApps()) {
-      if (!m_listprovider->isValidAppId(blockedAppId)) {
-        // In case the AppID is no longer valid we don't need to keep it
-        logger.log() << "Removed obsolete appid" << blockedAppId;
-        settingsHolder->removeVpnDisabledApp(blockedAppId);
-      } else if (!keys.contains(blockedAppId)) {
-        // In case the AppID is valid but not in our applist, we need to create
-        // an entry
-        logger.log() << "Added missing appid" << blockedAppId;
-        m_applist.append(AppDescription(blockedAppId, applist[blockedAppId]));
+    foreach (QString blockedAppID, settingsHolder->vpnDisabledApps()) {
+      if (!keys.contains(blockedAppID)) {
+        logger.log() << "Removed obsolete appid" << blockedAppID;
+        settingsHolder->removeVpnDisabledApp(blockedAppID);
       }
     }
   }
@@ -140,52 +128,15 @@ void AppPermission::receiveAppList(const QMap<QString, QString>& applist) {
   endResetModel();
 }
 
-void AppPermission::protectAll() {
-  logger.log() << "Protected all";
-
+Q_INVOKABLE void AppPermission::protectAll() {
   SettingsHolder::instance()->setVpnDisabledApps(QStringList());
   dataChanged(createIndex(0, 0), createIndex(m_applist.size(), 0));
 };
-
-void AppPermission::unprotectAll() {
-  logger.log() << "Unprotected all";
-
+Q_INVOKABLE void AppPermission::unprotectAll() {
   QStringList allAppIds;
   for (auto app : m_applist) {
     allAppIds.append(app.id);
   }
   SettingsHolder::instance()->setVpnDisabledApps(allAppIds);
   dataChanged(createIndex(0, 0), createIndex(m_applist.size(), 0));
-}
-
-void AppPermission::openFilePicker() {
-  logger.log() << "File picker required";
-
-  QFileDialog fp(nullptr, qtTrId("vpn.protectSelectedApps.addApplication"));
-
-  QStringList locations =
-      QStandardPaths::standardLocations(QStandardPaths::HomeLocation);
-  if (!locations.isEmpty()) {
-    fp.setDirectory(locations.first());
-  }
-
-  fp.setFilter(QDir::Executable | QDir::Files | QDir::NoDotAndDotDot);
-  fp.setFileMode(QFileDialog::ExistingFile);
-
-  if (!fp.exec()) {
-    logger.log() << "File picker exection aborted";
-    return;
-  }
-
-  QStringList fileNames = fp.selectedFiles();
-  if (fileNames.isEmpty()) {
-    logger.log() << "File picker - no selection";
-    return;
-  }
-
-  logger.log() << "Selection:" << fileNames;
-  Q_ASSERT(fileNames.length() == 1);
-
-  Q_ASSERT(m_listprovider);
-  m_listprovider->addApplication(fileNames[0]);
-}
+};

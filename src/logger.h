@@ -5,8 +5,6 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 
-#include "loglevel.h"
-
 #include <QString>
 #include <QTextStream>
 
@@ -52,7 +50,7 @@ class Logger {
 
   class Log {
    public:
-    Log(Logger* logger, LogLevel level);
+    Log(Logger* logger);
     ~Log();
 
     Log& operator<<(uint64_t t);
@@ -65,7 +63,6 @@ class Logger {
 
    private:
     Logger* m_logger;
-    LogLevel m_logLevel;
 
     struct Data {
       Data() : m_ts(&m_buffer, QIODevice::WriteOnly) {}
@@ -77,11 +74,7 @@ class Logger {
     Data* m_data;
   };
 
-  // This will be deprecated soon. Don't use it!
   Log log();
-  Log error();
-  Log warning();
-  Log debug();
 
  private:
   QStringList m_modules;

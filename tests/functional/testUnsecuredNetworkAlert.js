@@ -7,7 +7,7 @@ const util = require('util');
 const vpn = require('./helper.js');
 
 describe('Unsecured network alert', function() {
-  this.timeout(300000);
+  this.timeout(500000);
 
   before(async () => {
     await vpn.connect();

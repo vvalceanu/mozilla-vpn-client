@@ -3,7 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 const assert = require('assert');
-const fs = require('fs');
 const websocket = require('websocket').w3cwebsocket;
 const FirefoxHelper = require('./firefox.js');
 
@@ -330,13 +329,13 @@ module.exports = {
     if (this.currentTest.state === 'failed') {
       const data = await module.exports.screenCapture();
       const buffer = Buffer.from(data, 'base64');
-      const dir = process.env.ARTIFACT_DIR + '/screencapture';
-      const title = this.currentTest.title.toLowerCase();
-      const filename = title.replace(/[^a-z0-9]/g, '_');
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir);
-      }
-      fs.writeFileSync(`${dir}/${filename}.png`, buffer);
+      require('fs').writeFileSync('/tmp/img.png', buffer);
+      const {exec} = require('child_process');
+      exec('TERM=xterm-256color jp2a /tmp/img.png', (error, stdout, stderr) => {
+        if (error) console.log(error);
+        console.log(stderr);
+        console.log(stdout);
+      });
     }
   },
 

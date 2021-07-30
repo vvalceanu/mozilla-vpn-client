@@ -6,4 +6,3 @@
 ./glean/org/mozilla/Glean/glean.js
 ./glean/org/mozilla/Glean/glean.lib.js
 ./glean/telemetry/*
-./translations/generated/*

@@ -33,7 +33,7 @@ Item {
         anchors.left: root.left
         anchors.right: root.right
         anchors.top: menu.bottom
-        flickContentHeight: col.y + col.childrenRect.height + ( Theme.rowHeight * 2 )
+        flickContentHeight: col.childrenRect.height
         interactive: flickContentHeight > height
         property bool vpnIsOff: (VPNController.state === VPNController.StateOff)
 
@@ -48,29 +48,24 @@ Item {
             id: col
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.rightMargin: Theme.windowMargin
             anchors.top: parent.top
-            anchors.topMargin: Theme.windowMargin
-            spacing: Theme.windowMargin
-
-            VPNCheckBoxAlert {
-                //% "VPN must be off to edit these settings"
-                //: Associated to a group of settings that require the VPN to be disconnected to change
-                errorMessage: qsTrId("vpn.settings.vpnMustBeOff")
-            }
+            anchors.topMargin: 18
+            spacing: 18
 
             VPNCheckBoxRow {
                 id: captivePortalAlert
                 objectName: "settingCaptivePortalAlert"
-                width: parent.width
+                width: parent.width - Theme.windowMargin
                 visible: VPNFeatureList.captivePortalNotificationSupported
+
                 //% "Guest Wi-Fi portal alert"
                 labelText: qsTrId("vpn.settings.guestWifiAlert")
                 //% "Get notified if a guest Wi-Fi portal is blocked due to VPN connection"
                 subLabelText: qsTrId("vpn.settings.guestWifiAlert.description")
+
                 isChecked: (VPNSettings.captivePortalAlert)
                 isEnabled: vpnFlickable.vpnIsOff
-                showDivider: isEnabled
+                showDivider: vpnFlickable.vpnIsOff
                 onClicked: {
                     if (vpnFlickable.vpnIsOff) {
                         VPNSettings.captivePortalAlert = !VPNSettings.captivePortalAlert
@@ -81,16 +76,17 @@ Item {
             VPNCheckBoxRow {
                 id: unsecuredNetworkAlert
                 objectName: "settingUnsecuredNetworkAlert"
-                width: parent.width
+                width: parent.width - Theme.windowMargin
                 visible: VPNFeatureList.unsecuredNetworkNotificationSupported
 
                 //% "Unsecured network alert"
                 labelText: qsTrId("vpn.settings.unsecuredNetworkAlert")
                 //% "Get notified if you connect to an unsecured Wi-Fi network"
                 subLabelText: qsTrId("vpn.settings.unsecuredNetworkAlert.description")
+
                 isChecked: (VPNSettings.unsecuredNetworkAlert)
                 isEnabled: vpnFlickable.vpnIsOff
-                showDivider: isEnabled
+                showDivider: vpnFlickable.vpnIsOff
                 onClicked: {
                     if (vpnFlickable.vpnIsOff) {
                         VPNSettings.unsecuredNetworkAlert = !VPNSettings.unsecuredNetworkAlert
@@ -98,17 +94,28 @@ Item {
                }
             }
 
+            VPNCheckBoxAlert {
+                visible: !vpnFlickable.vpnIsOff
+
+                //% "VPN must be off to edit these settings"
+                //: Associated to a group of settings that require the VPN to be disconnected to change
+                errorMessage: qsTrId("vpn.settings.vpnMustBeOff")
+            }
+
             VPNCheckBoxRow {
                 id: switchServersAlert
                 objectName: "switchServersAlert"
                 visible: VPNFeatureList.notificationControlSupported
-                width: parent.width
 
-                //% "Server switching notification"
-                labelText: qsTrId("vpn.settings.notification.serverSwitch2")
+                width: parent.width - Theme.windowMargin
+
+                //% "Server Switching Notification"
+                labelText: qsTrId("vpn.settings.notification.serverSwitch")
                 //% "Get notified when you successfully switched servers"
                 subLabelText: qsTrId("vpn.settings.notification.serverSwitch.description")
+
                 isChecked: (VPNSettings.serverSwitchNotification)
+                showDivider: true
                 onClicked: {
                     VPNSettings.serverSwitchNotification = !VPNSettings.serverSwitchNotification
                }
@@ -118,13 +125,16 @@ Item {
                 id: connectionChangeAlert
                 objectName: "connectionChangeAlert"
                 visible: VPNFeatureList.notificationControlSupported
-                width: parent.width
 
-                //% "Connection change notification"
-                labelText: qsTrId("vpn.settings.notification.connectionChange2")
+                width: parent.width - Theme.windowMargin
+
+                //% "Connection Change Notification"
+                labelText: qsTrId("vpn.settings.notification.connectionChange")
                 //% "Get notified when the connection status changes"
                 subLabelText: qsTrId("vpn.settings.notification.connectionChange.description")
+
                 isChecked: (VPNSettings.connectionChangeNotification)
+                showDivider: true
                 onClicked: {
                     VPNSettings.connectionChangeNotification = !VPNSettings.connectionChangeNotification
                 }

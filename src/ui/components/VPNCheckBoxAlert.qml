@@ -8,18 +8,17 @@ import Mozilla.VPN 1.0
 import "../themes/themes.js" as Theme
 
 RowLayout {
-    property var leftMargin:  56
-    property var alertColor: Theme.checkBoxWarning
-    property var errorMessage
-
     id: turnVPNOffAlert
-
+    property var leftMargin:  56
     visible: (VPNController.state !== VPNController.StateOff)
     anchors.left: parent.left
     anchors.right: parent.right
+    anchors.topMargin: 12
+    anchors.leftMargin: leftMargin
     anchors.rightMargin: Theme.windowMargin
     spacing: 0
-    anchors.leftMargin: Theme.windowMargin
+
+    property var errorMessage: "..."
 
     Rectangle {
         color: "transparent"
@@ -32,7 +31,7 @@ RowLayout {
         VPNIcon {
             id: warningIcon
 
-            source: alertColor === Theme.red ?  "../resources/warning.svg" : "../resources/warning-dark-orange.svg"
+            source: "../resources/warning.svg"
             sourceSize.height: 14
             sourceSize.width: 14
             Layout.alignment: Qt.AlignVCenter
@@ -42,7 +41,7 @@ RowLayout {
     VPNTextBlock {
         id: message
         text: errorMessage
-        color: alertColor
+        color: Theme.red
         Layout.fillWidth: true
     }
 

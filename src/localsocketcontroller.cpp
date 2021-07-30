@@ -122,12 +122,6 @@ void LocalSocketController::activate(
     allowedIPAddesses.append(range);
   };
   json.insert("allowedIPAddressRanges", allowedIPAddesses);
-  QJsonArray splitTunnelApps;
-  for (const auto& uri : vpnDisabledApps) {
-    splitTunnelApps.append(QJsonValue(uri));
-  }
-  json.insert("vpnDisabledApps", splitTunnelApps);
-
   write(json);
 }
 

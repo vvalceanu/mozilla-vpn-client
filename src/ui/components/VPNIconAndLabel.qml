@@ -32,8 +32,6 @@ RowLayout {
         // to hide its content (such as VPNIconAndLabel) from
         // assistive technology.
         Accessible.ignored: true
-        wrapMode: Text.WordWrap
-        Layout.fillWidth: true
     }
 
 }

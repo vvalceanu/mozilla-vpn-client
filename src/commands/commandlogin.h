@@ -13,10 +13,6 @@ class CommandLogin final : public Command {
   ~CommandLogin();
 
   int run(QStringList& tokens) override;
-
- private:
-  static QString getInput(const QString& prompt);
-  static QString getPassword(const QString& prompt);
 };
 
 #endif  // COMMANDLOGIN_H

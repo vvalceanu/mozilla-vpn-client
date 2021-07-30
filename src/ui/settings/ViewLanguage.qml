@@ -11,9 +11,10 @@ import "../components/forms"
 import "../themes/themes.js" as Theme
 
 Item {
-    property var useSystemLanguageEnabled: toggleCard.toggleChecked
-
     id: container
+
+    readonly property int defaultMargin: 18
+    property var useSystemLanguageEnabled: useSystemLanguageToggle.checked
 
     VPNMenu {
         id: menu
@@ -29,8 +30,6 @@ Item {
 
         height: parent.height - menu.height
         anchors.top: menu.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
         width: parent.width
         Accessible.name: menu.title
         Accessible.role: Accessible.List
@@ -43,44 +42,85 @@ Item {
             id: vpnFlickable
 
             objectName: "settingsLanguagesView"
-            flickContentHeight: col.y + col.implicitHeight + (Theme.rowHeight * 2)
+            flickContentHeight: row.y + row.implicitHeight + col.y + col.implicitHeight + (Theme.rowHeight * 2)
             anchors.fill: parent
 
-            VPNToggleCard {
-                id: toggleCard
-
-                toggleObjectName: "settingsSystemLanguageToggle"
+            RowLayout {
+                id: row
+                width: parent.width - (defaultMargin * 2)
                 anchors.left: parent.left
                 anchors.right: parent.right
-                height: childrenRect.height
+                anchors.leftMargin: defaultMargin
+                anchors.rightMargin: defaultMargin
+                anchors.top: parent.top
+                anchors.topMargin: 20
+                spacing: 12
 
-                //% "Use system language"
-                //: Title for the language switcher toggle.
-                labelText: qsTrId("vpn.settings.systemLanguageTitle")
+                ColumnLayout {
+                    id: labelWrapper
+                    spacing: 4
+                    Layout.maximumWidth: parent.width - useSystemLanguageToggle.width - 16
 
-                //% "Mozilla VPN will use the default system language."
-                //: Description for the language switcher toggle when
-                //: "Use system language" is enabled.
-                sublabelText: qsTrId("vpn.settings.systemLangaugeSubtitle")
-
-                toolTipTitleText: {
-                    if (toggleChecked) {
-                       //% "Disable to select a different language"
-                       //: Tooltip for the language switcher toggle
-                       return qsTrId("vpn.settings.systemLanguageEnabled");
+                    VPNInterLabel {
+                        id: label
+                        Layout.alignment: Qt.AlignLeft
+                        //% "Use system language"
+                        //: Title for the language switcher toggle.
+                        text: qsTrId("vpn.settings.systemLanguageTitle")
+                        color: Theme.fontColorDark
+                        horizontalAlignment: Text.AlignLeft
+                        Layout.fillWidth: true
                     }
-                    return qsTrId("vpn.settings.systemLanguageTitle");
+
+                    VPNTextBlock {
+                        id: labelDescription
+                        Layout.fillWidth: true
+                        //% "Mozilla VPN will use the default system language."
+                        //: Description for the language switcher toggle when
+                        //: "Use system language" is enabled.
+                        text: qsTrId("vpn.settings.systemLangaugeSubtitle")
+                    }
                 }
 
-                toggleChecked: VPNLocalizer.code === ""
-                function handleClick() {
-                    toggleChecked = !toggleChecked
-                    if (toggleChecked) {
-                        VPNLocalizer.code = "";
-                    } else {
-                        VPNLocalizer.code = VPNLocalizer.previousCode;
+                VPNSettingsToggle {
+                    id: useSystemLanguageToggle
+
+                    objectName: "settingsSystemLanguageToggle"
+                    toolTipTitle: {
+                        if (checked) {
+                           //% "Disable to select a different language"
+                           //: Tooltip for the language switcher toggle
+                           return qsTrId("vpn.settings.systemLanguageEnabled");
+                        }
+                        return qsTrId("vpn.settings.systemLanguageTitle");
+                    }
+
+                    Layout.preferredHeight: 24
+                    Layout.preferredWidth: 45
+                    width: undefined
+                    height: undefined
+                    Keys.onDownPressed: if (!checked) repeater.itemAt(0).forceActiveFocus()
+                    checked: VPNLocalizer.code === ""
+                    onClicked: {
+                        checked = !checked;
+                        if (checked) {
+                            VPNLocalizer.code = "";
+                        } else {
+                            VPNLocalizer.code = VPNLocalizer.previousCode;
+                        }
                     }
                 }
+            }
+
+            Rectangle {
+                id: divider
+                height: 1
+                width: parent.width - 36
+                anchors.top: row.bottom
+                anchors.topMargin: defaultMargin
+                anchors.horizontalCenter: parent.horizontalCenter
+                color: "#E7E7E7"
+                opacity: 1
             }
 
             Column {
@@ -88,13 +128,11 @@ Item {
 
                 objectName: "languageList"
                 opacity: useSystemLanguageEnabled ? .5 : 1
-                spacing: Theme.vSpacing
+                spacing: 20
                 anchors.left: parent.left
                 anchors.right: parent.right
-                anchors.leftMargin: Theme.vSpacing
-                anchors.rightMargin: Theme.vSpacing
-                anchors.top: toggleCard.bottom
-                anchors.topMargin: Theme.vSpacing *  1.5
+                anchors.top: divider.bottom
+                anchors.topMargin: Theme.vSpacing
                 Component.onCompleted: {
 
                     if (useSystemLanguageEnabled) {
@@ -131,6 +169,8 @@ Item {
                     height: Theme.rowHeight
                     anchors.left: parent.left
                     anchors.right: parent.right
+                    anchors.leftMargin: defaultMargin
+                    anchors.rightMargin: defaultMargin
                     onTextChanged: text => {
                         model.invalidate();
                     }
@@ -165,7 +205,8 @@ Item {
                             VPNLocalizer.code = code;
                         }
                         anchors.left: parent.left
-                        width: parent.width
+                        anchors.leftMargin: defaultMargin
+                        width: parent.width - defaultMargin * 2
                         //% "%1 %2"
                         //: This string is read by accessibility tools.
                         //: %1 is the language name, %2 is the localized language name.

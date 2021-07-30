@@ -30,8 +30,6 @@ const redPressed = "#C50042";
 const redfocusOutline = "#66C50042";
 const white = "#FFFFFF"
 
-const checkBoxWarning = "#C45A27";
-
 const errorFocusOutline = "#FFBDC5";
 
 const fontColor = "#6D6D6E";
@@ -50,11 +48,9 @@ const cityListTopMargin = 18;
 const controllerInterLineHeight = 18;
 const hSpacing = 20;
 const vSpacing = 24;
-const vSpacingSmall = 16;
 const listSpacing = 8;
 const maxTextWidth = 296;
 const windowMargin = 16;
-const popupMargin = 24;
 const desktopAppHeight = 520;
 const desktopAppWidth = 360;
 
@@ -110,16 +106,17 @@ const linkButton = {
     "buttonHovered": bgColorTransparent,
     "buttonPressed": bgColorTransparent,
     "focusOutline": bgColorTransparent,
-    "focusBorder": blueFocusBorder,
+    "focusBorder": darkFocusBorder,
 };
 
-const greyButton = {
-    "defaultColor": "#CECECF",
-    "buttonHovered": greyHovered,
+const popupButtonCancel = {
+    "defaultColor": grey,
+    "buttonHovered": "#CCCCCC",
     "buttonPressed": greyPressed,
-    "focusOutline": greyHovered,
-    "focusBorder": greyPressed,
+    "focusOutline": greyPressed,
+    "focusBorder": darkFocusBorder
 };
+
 
 const redButton = {
     "defaultColor" : red,

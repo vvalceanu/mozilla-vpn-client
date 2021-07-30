@@ -37,11 +37,9 @@ void CaptivePortalRequest::run() {
 
   // We do not have IPs to check.
   if (ipv4Addresses.isEmpty() && ipv6Addresses.isEmpty()) {
-    emit completed(NoPortal);
+    onResult(NoPortal);
     return;
   }
-  m_running = 0;
-  m_success = 0;
 
   // We do not care which request succeeds.
   // Let's make 1 request for any available IP addresses. The first one will
@@ -90,28 +88,13 @@ void CaptivePortalRequest::createRequest(const QUrl& url) {
             logger.log() << "Captive portal detected. Content does not match.";
             onResult(PortalDetected);
           });
-
-  m_running++;
 }
 
 void CaptivePortalRequest::onResult(CaptivePortalResult portalDetected) {
-  Q_ASSERT(m_running > 0);
-  m_running--;
-  if (portalDetected == NoPortal) {
-    m_success++;
-  }
-
-  // If any request detects a portal, we can terminate immediately.
-  if (portalDetected == PortalDetected) {
-    deleteLater();
-    emit completed(portalDetected);
+  if (m_completed) {
     return;
   }
-
-  // Otherwise, we are complete after all the workers have terminated.
-  if (m_running == 0) {
-    deleteLater();
-    emit completed((m_success > 0) ? NoPortal : Failure);
-    return;
-  }
+  m_completed = true;
+  deleteLater();
+  emit completed(portalDetected);
 }

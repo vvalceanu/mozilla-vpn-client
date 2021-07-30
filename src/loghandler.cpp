@@ -28,24 +28,6 @@ QMutex s_mutex;
 QString s_location =
     QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
 LogHandler* s_instance = nullptr;
-
-LogLevel qtTypeToLogLevel(QtMsgType type) {
-  switch (type) {
-    case QtDebugMsg:
-      return Debug;
-    case QtInfoMsg:
-      return Info;
-    case QtWarningMsg:
-      return Warning;
-    case QtCriticalMsg:
-      [[fallthrough]];
-    case QtFatalMsg:
-      return Error;
-    default:
-      return Debug;
-  }
-}
-
 }  // namespace
 
 // static
@@ -59,35 +41,23 @@ void LogHandler::messageQTHandler(QtMsgType type,
                                   const QMessageLogContext& context,
                                   const QString& message) {
   QMutexLocker lock(&s_mutex);
-  maybeCreate(lock)->addLog(Log(qtTypeToLogLevel(type), context.file,
-                                context.function, context.line, message),
-                            lock);
+  maybeCreate(lock)->addLog(
+      Log(type, context.file, context.function, context.line, message), lock);
 }
 
 // static
-void LogHandler::messageHandler(LogLevel logLevel, const QStringList& modules,
+void LogHandler::messageHandler(const QStringList& modules,
                                 const QString& className,
                                 const QString& message) {
   QMutexLocker lock(&s_mutex);
-  maybeCreate(lock)->addLog(Log(logLevel, modules, className, message), lock);
+  maybeCreate(lock)->addLog(Log(modules, className, message), lock);
 }
 
 // static
 LogHandler* LogHandler::maybeCreate(const QMutexLocker& proofOfLock) {
   if (!s_instance) {
-    LogLevel minLogLevel = Debug;  // TODO: in prod, we should log >= warning
     QStringList modules;
     QProcessEnvironment pe = QProcessEnvironment::systemEnvironment();
-    if (pe.contains("MOZVPN_LEVEL")) {
-      QString level = pe.value("MOZVPN_LEVEL");
-      if (level == "info")
-        minLogLevel = Info;
-      else if (level == "warning")
-        minLogLevel = Warning;
-      else if (level == "error")
-        minLogLevel = Error;
-    }
-
     if (pe.contains("MOZVPN_LOG")) {
       QStringList parts = pe.value("MOZVPN_LOG").split(",");
       for (const QString& part : parts) {
@@ -95,7 +65,7 @@ LogHandler* LogHandler::maybeCreate(const QMutexLocker& proofOfLock) {
       }
     }
 
-    s_instance = new LogHandler(minLogLevel, modules, proofOfLock);
+    s_instance = new LogHandler(modules, proofOfLock);
   }
 
   return s_instance;
@@ -105,25 +75,28 @@ LogHandler* LogHandler::maybeCreate(const QMutexLocker& proofOfLock) {
 void LogHandler::prettyOutput(QTextStream& out, const LogHandler::Log& log) {
   out << "[" << log.m_dateTime.toString("dd.MM.yyyy hh:mm:ss.zzz") << "] ";
 
-  switch (log.m_logLevel) {
-    case Debug:
-      out << "Debug: ";
-      break;
-    case Info:
-      out << "Info: ";
-      break;
-    case Warning:
-      out << "Warning: ";
-      break;
-    case Error:
-      out << "Error: ";
-      break;
-    default:
-      out << "?!?: ";
-      break;
-  }
-
   if (log.m_fromQT) {
+    switch (log.m_type) {
+      case QtDebugMsg:
+        out << "Debug: ";
+        break;
+      case QtInfoMsg:
+        out << "Info: ";
+        break;
+      case QtWarningMsg:
+        out << "Warning: ";
+        break;
+      case QtCriticalMsg:
+        out << "Critical: ";
+        break;
+      case QtFatalMsg:
+        out << "Fatal: ";
+        break;
+      default:
+        out << "?!?: ";
+        break;
+    }
+
     out << log.m_message;
 
     if (!log.m_file.isEmpty() || !log.m_function.isEmpty()) {
@@ -156,9 +129,9 @@ void LogHandler::prettyOutput(QTextStream& out, const LogHandler::Log& log) {
   out << Qt::endl;
 }
 
-LogHandler::LogHandler(LogLevel minLogLevel, const QStringList& modules,
+LogHandler::LogHandler(const QStringList& modules,
                        const QMutexLocker& proofOfLock)
-    : m_minLogLevel(minLogLevel), m_modules(modules) {
+    : m_modules(modules) {
   Q_UNUSED(proofOfLock);
 
   if (!s_location.isEmpty()) {
@@ -167,10 +140,6 @@ LogHandler::LogHandler(LogLevel minLogLevel, const QStringList& modules,
 }
 
 void LogHandler::addLog(const Log& log, const QMutexLocker& proofOfLock) {
-  if (!matchLogLevel(log, proofOfLock)) {
-    return;
-  }
-
   if (!matchModule(log, proofOfLock)) {
     return;
   }
@@ -224,12 +193,6 @@ bool LogHandler::matchModule(const Log& log,
   }
 
   return false;
-}
-
-bool LogHandler::matchLogLevel(const Log& log,
-                               const QMutexLocker& proofOfLock) const {
-  Q_UNUSED(proofOfLock);
-  return log.m_logLevel >= m_minLogLevel;
 }
 
 // static
@@ -320,7 +283,7 @@ void LogHandler::openLogFile(const QMutexLocker& proofOfLock) {
 
   m_output = new QTextStream(m_logFile);
 
-  addLog(Log(Debug, QStringList{LOG_MAIN}, "LogHandler",
+  addLog(Log(QStringList{LOG_MAIN}, "LogHandler",
              QString("Log file: %1").arg(logFileName)),
          proofOfLock);
 }

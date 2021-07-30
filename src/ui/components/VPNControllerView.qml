@@ -76,11 +76,6 @@ Item {
             }
 
             PropertyChanges {
-                target: logoSubtitleOn
-                visible: false
-            }
-
-            PropertyChanges {
                 target: settingsImage
                 source: "../resources/settings.svg"
             }
@@ -125,11 +120,6 @@ Item {
                 text: qsTrId("vpn.controller.activationSloagan")
                 color: Theme.fontColor
                 opacity: 1
-            }
-
-            PropertyChanges {
-                target: logoSubtitleOn
-                visible: false
             }
 
             PropertyChanges {
@@ -179,11 +169,6 @@ Item {
                 text: qsTrId("vpn.controller.activating")
                 color: "#FFFFFF"
                 opacity: 0.8
-            }
-
-            PropertyChanges {
-                target: logoSubtitleOn
-                visible: false
             }
 
             PropertyChanges {
@@ -242,11 +227,6 @@ Item {
             }
 
             PropertyChanges {
-                target: logoSubtitleOn
-                visible: false
-            }
-
-            PropertyChanges {
                 target: settingsImage
                 source: "../resources/settings-white.svg"
             }
@@ -294,12 +274,11 @@ Item {
 
             PropertyChanges {
                 target: logoSubtitle
-                visible: false
-            }
-
-            PropertyChanges {
-                target: logoSubtitleOn
-                visible: true
+                //% "Secure and private"
+                //: This refers to the user’s internet connection.
+                text: qsTrId("vpn.controller.active") + "  •  " + formatTime(VPNController.time)
+                color: "#FFFFFF"
+                opacity: 0.8
             }
 
             PropertyChanges {
@@ -346,11 +325,6 @@ Item {
                 text: qsTrId("vpn.controller.deactivating")
                 color: Theme.fontColor
                 opacity: 1
-            }
-
-            PropertyChanges {
-                target: logoSubtitleOn
-                visible: false
             }
 
             PropertyChanges {
@@ -406,11 +380,6 @@ Item {
                 text: qsTrId("vpn.controller.switchingDetail").arg(VPNController.currentLocalizedCityName).arg(VPNController.switchingLocalizedCityName)
                 color: "#FFFFFF"
                 opacity: 0.8
-            }
-
-            PropertyChanges {
-                target: logoSubtitleOn
-                visible: false
             }
 
             PropertyChanges {
@@ -597,7 +566,7 @@ Item {
         }
     }
 
-    Column {
+    Column{
         id: col
 
         spacing: 0
@@ -659,30 +628,6 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
             onPaintedHeightChanged: if (visible) col.handleMultilineText()
             onVisibleChanged: if (visible) col.handleMultilineText()
-        }
-
-        RowLayout {
-          id: logoSubtitleOn
-
-          anchors.horizontalCenter: parent.horizontalCenter
-          opacity: 0.8
-
-          VPNInterLabel {
-            objectName: "secureAndPrivateSubtitle"
-
-            color: Theme.white
-            lineHeight: Theme.controllerInterLineHeight
-            Accessible.ignored: true
-
-            //% "Secure and private"
-            //: This refers to the user’s internet connection.
-            text: qsTrId("vpn.controller.active") + " • "
-          }
-
-          VPNSemiMonoLabel {
-            id: connectionTime
-            Accessible.ignored: true
-          }
         }
 
         VPNConnectionStability {

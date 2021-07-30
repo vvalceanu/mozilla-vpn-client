@@ -9,6 +9,8 @@ const vpn = require('./helper.js');
 const webdriver = require('selenium-webdriver'), By = webdriver.By,
       Keys = webdriver.Key, until = webdriver.until;
 
+const exec = util.promisify(require('child_process').exec);
+
 describe('Server list', function() {
   let servers;
   let currentCountryCode;
@@ -197,9 +199,9 @@ describe('Server list', function() {
 
     assert(currentCountry != '');
 
-    assert.strictEqual(vpn.lastNotification().title, 'VPN Connected');
-    assert.strictEqual(
-        vpn.lastNotification().message,
+    assert(vpn.lastNotification().title === 'VPN Connected');
+    assert(
+        vpn.lastNotification().message ===
         `Connected to ${currentCountry}, ${currentCity}`);
 
     await vpn.clickOnElement('serverListButton');
@@ -249,8 +251,8 @@ describe('Server list', function() {
       return connectingMsg === 'Switching…';
     });
 
-    assert.strictEqual(
-        await vpn.getElementProperty('controllerSubTitle', 'text'),
+    assert(
+        await vpn.getElementProperty('controllerSubTitle', 'text') ===
         `From ${previousCity} to ${currentCity}`);
 
     await vpn.waitForCondition(async () => {
@@ -258,9 +260,9 @@ describe('Server list', function() {
           'VPN is on';
     });
 
-    assert.strictEqual(vpn.lastNotification().title, 'VPN Switched Servers');
-    assert.strictEqual(
-        vpn.lastNotification().message,
+    assert(vpn.lastNotification().title === 'VPN Switched Servers');
+    assert(
+        vpn.lastNotification().message ===
         `Switched from ${previousCountry}, ${previousCity} to ${
             currentCountry}, ${currentCity}`);
   });

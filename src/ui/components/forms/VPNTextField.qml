@@ -12,14 +12,11 @@ import "./../../components"
 TextField {
     // TODO Add strings for Accessible.description, Accessible.name
     property bool stateError: false
-    property bool loseFocusOnOutsidePress: true
-
     id: textField
 
     Layout.preferredHeight: Theme.rowHeight
     onActiveFocusChanged: if (focus && vpnFlickable.ensureVisible) vpnFlickable.ensureVisible(textField)
     selectByMouse: true
-    inputMethodHints: Qt.ImhNoPredictiveText | Qt.ImhSensitiveData
 
     background: VPNInputBackground {
         showError: stateError

@@ -12,7 +12,6 @@
 
 class QHostAddress;
 class QNetworkAccessManager;
-class QurlQuery;
 
 class NetworkRequest final : public QObject {
   Q_OBJECT
@@ -61,41 +60,6 @@ class NetworkRequest final : public QObject {
                                            const qint8 rating,
                                            const QString& category);
 
-  static NetworkRequest* createForFxaAccountStatus(QObject* parent,
-                                                   const QString& emailAddress);
-
-  static NetworkRequest* createForFxaAccountCreation(QObject* parent,
-                                                     const QString& email,
-                                                     const QByteArray& authpw,
-                                                     const QUrlQuery& query);
-
-  static NetworkRequest* createForFxaLogin(QObject* parent,
-                                           const QString& email,
-                                           const QByteArray& authpw,
-                                           const QString& verificationCode,
-                                           const QUrlQuery& query);
-
-  static NetworkRequest* createForFxaSendUnblockCode(
-      QObject* parent, const QString& emailAddress);
-
-  static NetworkRequest* createForFxaSessionVerifyByEmailCode(
-      QObject* parent, const QByteArray& sessionToken, const QString& code,
-      const QUrlQuery& query);
-
-  static NetworkRequest* createForFxaSessionVerifyByTotpCode(
-      QObject* parent, const QByteArray& sessionToken, const QString& code,
-      const QUrlQuery& query);
-
-  static NetworkRequest* createForFxaSessionResendCode(
-      QObject* parent, const QByteArray& sessionToken);
-
-  static NetworkRequest* createForFxaAuthz(QObject* parent,
-                                           const QByteArray& sessionToken,
-                                           const QUrlQuery& query);
-
-  static NetworkRequest* createForFxaSessionDestroy(
-      QObject* parent, const QByteArray& sessionToken);
-
 #ifdef MVPN_IOS
   static NetworkRequest* createForIOSProducts(QObject* parent);
 
@@ -114,11 +78,8 @@ class NetworkRequest final : public QObject {
   int statusCode() const;
 
   QByteArray rawHeader(const QByteArray& headerName) const;
-  QUrl url() const { return m_reply ? m_reply->url() : m_request.url(); }
 
   void abort();
-
-  static QString apiBaseUrl();
 
  private:
   NetworkRequest(QObject* parent, int status, bool setAuthorizationHeader);
@@ -129,7 +90,6 @@ class NetworkRequest final : public QObject {
 
   void handleReply(QNetworkReply* reply);
   void handleHeaderReceived();
-  void handleRedirect(const QUrl& url);
 
  private slots:
   void replyFinished();
@@ -138,7 +98,6 @@ class NetworkRequest final : public QObject {
  signals:
   void requestHeaderReceived(NetworkRequest* request);
   void requestFailed(QNetworkReply::NetworkError error, const QByteArray& data);
-  void requestRedirected(NetworkRequest* request, const QUrl& url);
   void requestCompleted(const QByteArray& data);
 
  private:

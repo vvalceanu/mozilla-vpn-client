@@ -6,7 +6,6 @@
 #include "../../src/timersingleshot.h"
 #include "helper.h"
 #include "networkrequest.h"
-#include "constants.h"
 
 namespace {};
 
@@ -34,9 +33,6 @@ NetworkRequest::NetworkRequest(QObject* parent, int status,
 }
 
 NetworkRequest::~NetworkRequest() { MVPN_COUNT_DTOR(NetworkRequest); }
-
-// static
-QString NetworkRequest::apiBaseUrl() { return QString(Constants::API_URL); }
 
 // static
 NetworkRequest* NetworkRequest::createForGetUrl(QObject* parent, const QString&,

@@ -65,8 +65,6 @@ PRODBETAEXPR(
     "https://guardian-dev.herokuapp.com")
 PRODBETAEXPR(const char*, LOGO_URL, ":/ui/resources/logo-dock.png",
              ":/ui/resources/logo-dock-beta.png")
-PRODBETAEXPR(const char*, FXA_URL, "https://api.accounts.firefox.com",
-             "https://api-accounts.stage.mozaws.net")
 PRODBETAEXPR(
     const char*, BALROG_URL,
     "https://aus5.mozilla.org/json/1/FirefoxVPN/%1/%2/release/update.json",
@@ -96,7 +94,5 @@ constexpr const char* PLATFORM_NAME =
 #  error "Unsupported platform"
 #endif
     ;
-
-constexpr const char* PLACEHOLDER_USER_DNS = "127.0.0.1";
 
 };  // namespace Constants

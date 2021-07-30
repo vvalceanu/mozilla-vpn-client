@@ -36,7 +36,7 @@ IPFinder::~IPFinder() {
 void IPFinder::start() {
   logger.log() << "Starting the ip-lookup";
 
-  QUrl url(NetworkRequest::apiBaseUrl());
+  QUrl url(Constants::API_URL);
   m_lookupId = QHostInfo::lookupHost(url.host(), this,
                                      SLOT(dnsLookupCompleted(QHostInfo)));
 }

@@ -35,12 +35,10 @@ Item {
     VPNFlickable {
         id: vpnFlickable
         property bool vpnIsOff: (VPNController.state === VPNController.StateOff)
-        flickContentHeight:  VPNSettings.protectSelectedApps ? enabledList.y + enabledList.implicitHeight + 100 : vpnFlickable.y + toggleCard.height
+        flickContentHeight:  VPNSettings.protectSelectedApps ? enabledList.y + enabledList.implicitHeight + 100 : enabledList.y
         anchors.top: menu.bottom
         height: root.height - menu.height
-        anchors.left: parent.left
-        anchors.right: parent.right
-        interactive: (VPNSettings.protectSelectedApps)
+        width: root.width
         Component.onCompleted: {
             VPNAppPermissions.requestApplist();
             Sample.appPermissionsViewOpened.record();
@@ -51,40 +49,75 @@ Item {
 
         VPNCheckBoxAlert {
             id: vpnOnAlert
-            
+
+            anchors.top: parent.top
+            anchors.topMargin: Theme.windowMargin * 1
             visible: !vpnFlickable.vpnIsOff
             anchors.leftMargin: Theme.windowMargin
             anchors.left: parent.left
             //% "VPN must be off to edit App Permissions"
             //: Associated to a group of settings that require the VPN to be disconnected to change
             errorMessage: qsTrId("vpn.settings.protectSelectedApps.vpnMustBeOff")
-            anchors.top: parent.top
-            anchors.topMargin: Theme.windowMargin
         }
 
-        VPNToggleCard {
-            id: toggleCard
+        VPNDropShadow {
+            anchors.fill: rect
+            source: rect
+            z: -2
+        }
 
-            toggleObjectName: "settingsAppPermissionsToggle"
+        Rectangle {
+            id: rect
+            anchors.fill: enableAppList
+            anchors.topMargin: -Theme.windowMargin
+            anchors.bottomMargin: anchors.topMargin
+            anchors.leftMargin: -Theme.windowMargin
+            anchors.rightMargin: anchors.leftMargin
+            color: Theme.white
+            radius: 4
+        }
+
+        RowLayout {
+            id: enableAppList
+            anchors.top: vpnOnAlert.visible ? vpnOnAlert.bottom : parent.top
+            anchors.topMargin: Theme.windowMargin + (rect.anchors.topMargin *-1)
+            anchors.horizontalCenter: parent.horizontalCenter
             anchors.left: parent.left
             anchors.right: parent.right
-            height: childrenRect.height
-            anchors.top: vpnOnAlert.visible ? vpnOnAlert.bottom : parent.top
+            anchors.leftMargin: Theme.windowMargin * 2
+            anchors.rightMargin: Theme.windowMargin * 2
+            spacing: Theme.windowMargin
 
-            //% "Protect all apps with VPN"
-            labelText: qsTrId("vpn.settings.protectAllApps")
+            ColumnLayout {
+                Layout.alignment: Qt.AlignVCenter
+                VPNInterLabel {
+                    Layout.alignment: Qt.AlignLeft
+                    Layout.fillWidth: true
+                    //% "Protect all apps with VPN"
+                    text: qsTrId("vpn.settings.protectAllApps")
+                    color: Theme.fontColorDark
+                    horizontalAlignment: Text.AlignLeft
+                }
 
-            //% "VPN protects all apps by default. Turn off to choose which apps Mozilla VPN should not protect."
-            sublabelText: qsTrId("vpn.settings.protectAllApps.description")
+                VPNTextBlock {
+                    Layout.fillWidth: true
+                    //% "VPN protects all apps by default. Turn off to choose which apps Mozilla VPN should not protect."
+                    text: qsTrId("vpn.settings.protectAllApps.description")
+                    visible: !!text.length
+                    width: undefined
+                }
+            }
 
-            //% "VPN protects all apps by default. Turn off to choose which apps Mozilla VPN should not protect."
-            toolTipTitleText: qsTrId("vpn.settings.protectAllApps.description")
-
-            toggleChecked: (!VPNSettings.protectSelectedApps)
-
-            function handleClick() {
-                if (vpnFlickable.vpnIsOff) {
-                    VPNSettings.protectSelectedApps = !VPNSettings.protectSelectedApps
+            VPNSettingsToggle {
+                Layout.preferredHeight: 24
+                Layout.preferredWidth: 45
+                checked: (!VPNSettings.protectSelectedApps)
+                enabled: vpnFlickable.vpnIsOff
+                toolTipTitle: qsTrId("vpn.settings.protectAllApps")
+                onClicked: {
+                    if (vpnFlickable.vpnIsOff) {
+                        VPNSettings.protectSelectedApps = !VPNSettings.protectSelectedApps
+                    }
                 }
             }
         }
@@ -92,7 +125,7 @@ Item {
         VPNExpandableAppList {
             id: enabledList
             anchors.topMargin: 30
-            anchors.top: toggleCard.bottom
+            anchors.top: enableAppList.bottom
             searchBarPlaceholder: searchApps
 
             //% "Exclude apps from VPN protection"

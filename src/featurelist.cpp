@@ -41,7 +41,7 @@ bool FeatureList::localNetworkAccessSupported() const {
 }
 
 bool FeatureList::protectSelectedAppsSupported() const {
-#if defined(MVPN_ANDROID) || defined(MVPN_WINDOWS)
+#if defined(MVPN_ANDROID)
   return true;
 #elif defined(MVPN_LINUX)
   static bool initDone = false;
@@ -118,5 +118,3 @@ bool FeatureList::userDNSSupported() const {
   return false;
 #endif
 }
-
-bool FeatureList::authenticationInApp() const { return true; }

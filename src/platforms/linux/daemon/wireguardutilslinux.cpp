@@ -114,17 +114,17 @@ bool WireguardUtilsLinux::interfaceExists() {
   return currentInterfaces().contains(WG_INTERFACE);
 };
 
-bool WireguardUtilsLinux::addInterface(const InterfaceConfig& config) {
+bool WireguardUtilsLinux::addInterface() {
   int returnCode = wg_add_device(WG_INTERFACE);
   if (returnCode != 0) {
     qWarning("Adding interface `%s` failed with return code: %d", WG_INTERFACE,
              returnCode);
     return false;
   }
-  return updateInterface(config);
+  return true;
 }
 
-bool WireguardUtilsLinux::updateInterface(const InterfaceConfig& config) {
+bool WireguardUtilsLinux::configureInterface(const InterfaceConfig& config) {
   /*
    * Set conf:
    * - sets name of device
@@ -291,13 +291,6 @@ bool WireguardUtilsLinux::addRoutePrefix(const IPAddressRange& prefix) {
   return (result == nlmsg->nlmsg_len);
 }
 
-void WireguardUtilsLinux::flushRoutes() {
-  // We should probably implement this to ward off potential corruption in the
-  // routing table after silent server switching. It doesn't *really* affect
-  // Linux since we use the firewall mark to direct packets, but in theory it
-  // could break the captive portal check.
-}
-
 // PRIVATE METHODS
 QStringList WireguardUtilsLinux::currentInterfaces() {
   char* deviceNames = wg_list_device_names();
@@ -420,21 +413,21 @@ bool WireguardUtilsLinux::setAllowedIpsOnPeer(
     peer->last_allowedip = allowedip;
     allowedip->cidr = ip.range();
 
-    QString ipstring = ip.ipAddress();
+    bool ok = false;
     if (ip.type() == IPAddressRange::IPv4) {
       allowedip->family = AF_INET;
-      if (inet_pton(AF_INET, qPrintable(ipstring), &allowedip->ip4) != 1) {
-        logger.log() << "Invalid IPv4 address:" << ip.ipAddress();
-        return false;
-      }
+      ok = inet_pton(AF_INET, ip.ipAddress().toLocal8Bit(), &allowedip->ip4) ==
+           1;
     } else if (ip.type() == IPAddressRange::IPv6) {
       allowedip->family = AF_INET6;
-      if (inet_pton(AF_INET6, qPrintable(ipstring), &allowedip->ip6) != 1) {
-        logger.log() << "Invalid IPv6 address:" << ip.ipAddress();
-        return false;
-      }
+      ok = inet_pton(AF_INET6, ip.ipAddress().toLocal8Bit(), &allowedip->ip6) ==
+           1;
     } else {
       logger.log() << "Invalid IPAddressRange type";
+      return false;
+    }
+    if (!ok) {
+      logger.log() << "Invalid IP address:" << ip.ipAddress();
       return false;
     }
   }

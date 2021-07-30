@@ -45,7 +45,6 @@ class AppPermission final : public QAbstractListModel {
   };
 
   static AppPermission* instance();
-
   // Enables/Disabled the Given App ID for the vpn
   Q_INVOKABLE void flip(const QString& appID);
   // Is called from QML if the List is opened
@@ -55,8 +54,6 @@ class AppPermission final : public QAbstractListModel {
   Q_INVOKABLE void protectAll();
   // Remove all Apps from the Disabled App List
   Q_INVOKABLE void unprotectAll();
-
-  Q_INVOKABLE void openFilePicker();
 
   // QAbstractListModel methods
 
