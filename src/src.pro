@@ -32,7 +32,8 @@ INCLUDEPATH += \
             hacl-star \
             hacl-star/kremlin \
             hacl-star/kremlin/minimal \
-            ../glean/telemetry
+            ../glean/telemetry \
+            ../translations/generated
 
 DEPENDPATH  += $${INCLUDEPATH}
 
@@ -44,6 +45,8 @@ UI_DIR = .ui
 SOURCES += \
         apppermission.cpp \
         authenticationlistener.cpp \
+        authenticationinapp/authenticationinapp.cpp \
+        authenticationinapp/authenticationinapplistener.cpp \
         captiveportal/captiveportal.cpp \
         captiveportal/captiveportaldetection.cpp \
         captiveportal/captiveportaldetectionimpl.cpp \
@@ -77,9 +80,12 @@ SOURCES += \
         hacl-star/Hacl_Chacha20Poly1305_32.c \
         hacl-star/Hacl_Curve25519_51.c \
         hacl-star/Hacl_Poly1305_32.c \
+        hawkauth.cpp \
+        hkdf.cpp \
         ipaddress.cpp \
         ipaddressrange.cpp \
         ipfinder.cpp \
+        l18nstringsimpl.cpp \
         leakdetector.cpp \
         localizer.cpp \
         logger.cpp \
@@ -112,6 +118,7 @@ SOURCES += \
         releasemonitor.cpp \
         rfc/rfc1918.cpp \
         rfc/rfc4193.cpp \
+        rfc/rfc4291.cpp \
         rfc/rfc5735.cpp \
         serveri18n.cpp \
         settingsholder.cpp \
@@ -138,6 +145,8 @@ HEADERS += \
         apppermission.h \
         applistprovider.h \
         authenticationlistener.h \
+        authenticationinapp/authenticationinapp.h \
+        authenticationinapp/authenticationinapplistener.h \
         bigintipv6addr.h \
         captiveportal/captiveportal.h \
         captiveportal/captiveportaldetection.h \
@@ -171,6 +180,8 @@ HEADERS += \
         featurelist.h \
         filterproxymodel.h \
         fontloader.h \
+        hawkauth.h \
+        hkdf.h \
         ipaddress.h \
         ipaddressrange.h \
         ipfinder.h \
@@ -206,6 +217,7 @@ HEADERS += \
         releasemonitor.h \
         rfc/rfc1918.h \
         rfc/rfc4193.h \
+        rfc/rfc4291.h \
         rfc/rfc5735.h \
         serveri18n.h \
         settingsholder.h \
@@ -273,7 +285,12 @@ unix {
 }
 
 RESOURCES += qml.qrc
-RESOURCES += ../glean/glean.qrc
+
+exists($$PWD/../glean/telemetry/gleansample.h) {
+    RESOURCES += $$PWD/../glean/glean.qrc
+} else {
+    error(Glean generated files are missing. Please run `python3 ./scripts/generate_glean.py`)
+}
 
 QML_IMPORT_PATH =
 QML_DESIGNER_IMPORT_PATH =
@@ -537,7 +554,7 @@ else:android {
        include(../3rdparty/openSSL/openssl.pri)
     } else{
        message(Have you imported the 3rd-party git submodules? Read the README.md)
-       error(Did not found openSSL in 3rdparty/openSSL - Exiting Android Build )
+       error(Did not found openSSL in 3rdparty/openSSL - Exiting Android Build)
     }
 
     # For the android build we need to unset those
@@ -735,9 +752,14 @@ else:win* {
 
     QT += networkauth
     QT += svg
+    QT += winextras
 
     CONFIG += embed_manifest_exe
     DEFINES += MVPN_WINDOWS
+    DEFINES += WIN32_LEAN_AND_MEAN #Solves Redifinition Errors Of Winsock
+    LIBS += Fwpuclnt.lib #Windows Filtering Plattform
+    LIBS += Rpcrt4.lib
+    LIBS += Advapi32.lib
 
     production {
         RC_ICONS = ui/resources/logo.ico
@@ -751,10 +773,17 @@ else:win* {
         daemon/daemonlocalserverconnection.cpp \
         eventlistener.cpp \
         localsocketcontroller.cpp \
+        platforms/windows/windowsapplistprovider.cpp  \
+        platforms/windows/windowsappimageprovider.cpp \
         platforms/windows/daemon/windowsdaemon.cpp \
         platforms/windows/daemon/windowsdaemonserver.cpp \
         platforms/windows/daemon/windowsdaemontunnel.cpp \
-        platforms/windows/daemon/windowstunnelmonitor.cpp \
+        platforms/windows/daemon/windowstunnelservice.cpp \
+        platforms/windows/daemon/wireguardutilswindows.cpp \
+        platforms/windows/daemon/windowsfirewall.cpp \
+        platforms/windows/daemon/windowssplittunnel.cpp \
+        platforms/windows/windowsservicemanager.cpp \
+        platforms/windows/daemon/windowssplittunnel.cpp \
         platforms/windows/windowscommons.cpp \
         platforms/windows/windowscryptosettings.cpp \
         platforms/windows/windowsdatamigration.cpp \
@@ -775,10 +804,16 @@ else:win* {
         daemon/wireguardutils.h \
         eventlistener.h \
         localsocketcontroller.h \
+        platforms/windows/windowsapplistprovider.h \
+        platforms/windows/windowsappimageprovider.h \ 
         platforms/windows/daemon/windowsdaemon.h \
         platforms/windows/daemon/windowsdaemonserver.h \
         platforms/windows/daemon/windowsdaemontunnel.h \
-        platforms/windows/daemon/windowstunnelmonitor.h \
+        platforms/windows/daemon/windowstunnelservice.h \
+        platforms/windows/daemon/wireguardutilswindows.h \
+        platforms/windows/daemon/windowsfirewall.h \
+        platforms/windows/daemon/windowssplittunnel.h \
+        platforms/windows/windowsservicemanager.h \
         platforms/windows/windowscommons.h \
         platforms/windows/windowsdatamigration.h \
         platforms/windows/windowsnetworkwatcher.h \
@@ -837,16 +872,23 @@ else {
 
 RESOURCES += $$PWD/../translations/servers.qrc
 
+exists($$PWD/../translations/generated/l18nstrings.h) {
+    SOURCES += $$PWD/../translations/generated/l18nstrings_p.cpp
+    HEADERS += $$PWD/../translations/generated/l18nstrings.h
+} else {
+    error("No l18nstrings.h. Have you generated the strings?")
+}
+
 exists($$PWD/../translations/translations.pri) {
     include($$PWD/../translations/translations.pri)
 } else {
-    message(Languages were not imported - using fallback english)
+    message(Languages were not imported - using fallback English)
     TRANSLATIONS += \
-        ../translations/mozillavpn_en.ts
+        ../translations/en/mozillavpn_en.ts
 
-    ts.commands += lupdate $$PWD -no-obsolete -ts $$PWD/../translations/mozillavpn_en.ts
+    ts.commands += lupdate $$PWD -no-obsolete -ts $$PWD/../translations/en/mozillavpn_en.ts
     ts.CONFIG += no_check_exist
-    ts.output = $$PWD/../translations/mozillavpn_en.ts
+    ts.output = $$PWD/../translations/en/mozillavpn_en.ts
     ts.input = .
     QMAKE_EXTRA_TARGETS += ts
     PRE_TARGETDEPS += ts

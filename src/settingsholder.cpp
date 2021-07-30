@@ -3,11 +3,14 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "settingsholder.h"
+#include "constants.h"
 #include "cryptosettings.h"
 #include "featurelist.h"
 #include "leakdetector.h"
 #include "logger.h"
 #include "rfc/rfc1918.h"
+#include "rfc/rfc4193.h"
+#include "rfc/rfc4291.h"
 #include "rfc/rfc5735.h"
 
 #include <QSettings>
@@ -23,7 +26,7 @@ constexpr bool SETTINGS_SERVERSWITCHNOTIFICATION_DEFAULT = true;
 constexpr bool SETTINGS_CONNECTIONSWITCHNOTIFICATION_DEFAULT = true;
 constexpr bool SETTINGS_USEGATEWAYDNS_DEFAULT = true;
 const QStringList SETTINGS_VPNDISABLEDAPPS_DEFAULT = QStringList();
-const QString SETTINGS_USER_DNS_DEFAULT = "";
+constexpr const char* SETTINGS_USER_DNS_DEFAULT = "";
 
 constexpr const char* SETTINGS_IPV6ENABLED = "ipv6Enabled";
 constexpr const char* SETTINGS_LOCALNETWORKACCESS = "localNetworkAccess";
@@ -83,6 +86,8 @@ constexpr const char* SETTINGS_NATIVEANDROIDSDATAMIGRATED =
 #ifdef MVPN_WINDOWS
 constexpr const char* SETTINGS_NATIVEWINDOWSDATAMIGRATED =
     "nativeWindowsDataMigrated";
+
+constexpr const char* SETTINGS_WIN_MISSING_SPLITTUNNEL_APPS = "winMissingApps";
 #endif
 
 constexpr bool SETTINGS_GLEANENABLED_DEFAULT = true;
@@ -345,6 +350,29 @@ void SettingsHolder::addSubscriptionTransactions(
 GETSET(bool, toBool, SETTINGS_NATIVEWINDOWSDATAMIGRATED,
        hasNativeWindowsDataMigrated, nativeWindowsDataMigrated,
        setNativeWindowsDataMigrated)
+
+GETSET(QStringList, toStringList, SETTINGS_WIN_MISSING_SPLITTUNNEL_APPS,
+       hasMissingApps, missingApps, setMissingApps)
+
+void SettingsHolder::removeMissingApp(const QString& appID) {
+  QStringList applist;
+  if (hasMissingApps()) {
+    applist = missingApps();
+  }
+  applist.removeAll(appID);
+  setMissingApps(applist);
+}
+void SettingsHolder::addMissingApp(const QString& appID) {
+  QStringList applist;
+  if (hasMissingApps()) {
+    applist = missingApps();
+  }
+  if (applist.contains(appID)) {
+    return;
+  }
+  applist.append(appID);
+  setMissingApps(applist);
+}
 #endif
 
 #undef GETSET
@@ -393,23 +421,41 @@ SettingsHolder::UserDNSValidationResult SettingsHolder::validateUserDNS(
     return UserDNSInvalid;
   }
 
-  if (address.protocol() != QAbstractSocket::IPv4Protocol) {
-    return UserDNSNotIPv4;
-  }
-
   /* Currently we need to limit this to loopback and LAN IP addresses since the
    * killswitch makes sure that no dns traffic may happen to outside of lan
    */
 
-  if (RFC5735::ipv4LoopbackAddressBlock().contains(address)) {
-    return UserDNSOK;
-  }
-
-  for (const IPAddress& network : RFC1918::ipv4()) {
-    if (network.contains(address)) {
+  if (address.protocol() == QAbstractSocket::IPv4Protocol) {
+    if (RFC5735::ipv4LoopbackAddressBlock().contains(address)) {
       return UserDNSOK;
     }
+
+    for (const IPAddress& network : RFC1918::ipv4()) {
+      if (network.contains(address)) {
+        return UserDNSOK;
+      }
+    }
+
+    return UserDNSOutOfRange;
   }
 
-  return UserDNSOutOfRange;
+  if (address.protocol() == QAbstractSocket::IPv6Protocol) {
+    if (RFC4291::ipv6LoopbackAddressBlock().contains(address)) {
+      return UserDNSOK;
+    }
+
+    for (const IPAddress& network : RFC4193::ipv6()) {
+      if (network.contains(address)) {
+        return UserDNSOK;
+      }
+    }
+
+    return UserDNSOutOfRange;
+  }
+
+  return UserDNSInvalid;
+}
+
+QString SettingsHolder::placeholderUserDNS() const {
+  return Constants::PLACEHOLDER_USER_DNS;
 }

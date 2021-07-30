@@ -3,12 +3,15 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "commandui.h"
+#include "apppermission.h"
+#include "authenticationinapp/authenticationinapp.h"
 #include "captiveportal/captiveportaldetection.h"
 #include "closeeventhandler.h"
 #include "commandlineparser.h"
 #include "featurelist.h"
 #include "filterproxymodel.h"
 #include "fontloader.h"
+#include "l18nstrings.h"
 #include "leakdetector.h"
 #include "localizer.h"
 #include "logger.h"
@@ -18,8 +21,6 @@
 #include "qmlengineholder.h"
 #include "settingsholder.h"
 #include "systemtrayhandler.h"
-
-#include "apppermission.h"
 
 #ifdef MVPN_LINUX
 #  include "eventlistener.h"
@@ -53,6 +54,7 @@
 #ifdef MVPN_WINDOWS
 #  include "eventlistener.h"
 #  include "platforms/windows/windowsstartatbootwatcher.h"
+#  include "platforms/windows/windowsappimageprovider.h"
 #endif
 
 #ifdef MVPN_IOS
@@ -193,6 +195,11 @@ int CommandUI::run(QStringList& tokens) {
 #ifdef MVPN_ANDROID
     // Register an Image Provider that will resolve "image://app/{id}" for qml
     QQuickImageProvider* provider = new AndroidAppImageProvider(qApp);
+    engine->addImageProvider(QString("app"), provider);
+#endif
+#ifdef MVPN_WINDOWS
+    // Register an Image Provider that will resolve "image://app/{id}" for qml
+    QQuickImageProvider* provider = new WindowsAppImageProvider(qApp);
     engine->addImageProvider(QString("app"), provider);
 #endif
 
@@ -361,6 +368,22 @@ int CommandUI::run(QStringList& tokens) {
           return obj;
         });
 #endif
+
+    qmlRegisterSingletonType<MozillaVPN>(
+        "Mozilla.VPN", 1, 0, "VPNAuthInApp",
+        [](QQmlEngine*, QJSEngine*) -> QObject* {
+          QObject* obj = AuthenticationInApp::instance();
+          QQmlEngine::setObjectOwnership(obj, QQmlEngine::CppOwnership);
+          return obj;
+        });
+
+    qmlRegisterSingletonType<MozillaVPN>(
+        "Mozilla.VPN", 1, 0, "VPNl18n",
+        [](QQmlEngine*, QJSEngine*) -> QObject* {
+          QObject* obj = L18nStrings::instance();
+          QQmlEngine::setObjectOwnership(obj, QQmlEngine::CppOwnership);
+          return obj;
+        });
 
     qmlRegisterType<FilterProxyModel>("Mozilla.VPN", 1, 0,
                                       "VPNFilterProxyModel");
