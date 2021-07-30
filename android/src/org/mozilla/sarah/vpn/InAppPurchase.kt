@@ -40,6 +40,8 @@ class InAppPurchase () {
 
     companion object {
 
+        external fun onSkuDetailsReceived(subscriptionsDataJSONBlob: String);
+
         private const val TAG = "InAppPurchase"
 
         @JvmStatic
@@ -66,10 +68,8 @@ class InAppPurchase () {
                     when (responseCode) {
                         BillingClient.BillingResponseCode.OK -> {
                             Log.i(TAG, "onSkuDetailsResponse: $responseCode $debugMessage")
-                            val expectedSkuDetailsCount = 1
                             if (skuDetailsList == null) {
                                 Log.e(TAG, "onSkuDetailsResponse: " +
-                                        "Expected ${expectedSkuDetailsCount}, " +
                                         "Found null SkuDetails. " +
                                         "Check to see if the SKUs you requested are correctly published " +
                                         "in the Google Play Console.")
@@ -84,7 +84,9 @@ class InAppPurchase () {
                                         )
                                     )
                                 }
-                                Log.v(TAG, Json.encodeToString(googleProducts))
+                                val subscriptionsDataJSONBlob = Json.encodeToString(googleProducts)
+                                Log.d(TAG, subscriptionsDataJSONBlob)
+                                onSkuDetailsReceived(subscriptionsDataJSONBlob)
                             }
                         }
                         BillingClient.BillingResponseCode.SERVICE_DISCONNECTED,
@@ -132,7 +134,5 @@ class InAppPurchase () {
             })
 
         }
-
-
     }
 }

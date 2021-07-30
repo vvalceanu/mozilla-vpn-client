@@ -32,14 +32,14 @@
 #include <QTextCodec>
 #include <QtAndroid>
 
+#include "jni.h"
 #include <QAndroidJniEnvironment>
 #include <QAndroidJniObject>
 #include <QtAndroid>
-#include <jni.h>
 
 namespace {
 Logger logger(LOG_IAP, "IAPHandler");
-
+constexpr auto CLASSNAME = "org.mozilla.sarah.vpn.InAppPurchase";
 IAPHandler* s_instance = nullptr;
 }  // namespace
 
@@ -70,6 +70,36 @@ IAPHandler::~IAPHandler() {
 
   Q_ASSERT(s_instance == this);
   s_instance = nullptr;
+
+  QtAndroid::runOnAndroidThreadSync([]() {
+    // Hook in the native implementation for onSkuDetailsReceived into the JNI
+    JNINativeMethod methods[]{
+        {"onSkuDetailsReceived", "(Ljava/lang/String;)V",
+         reinterpret_cast<void*>(onSkuDetailsReceived)},
+    };
+    QAndroidJniObject javaClass(CLASSNAME);
+    QAndroidJniEnvironment env;
+    jclass objectClass = env->GetObjectClass(javaClass.object<jobject>());
+    env->RegisterNatives(objectClass, methods,
+                         sizeof(methods) / sizeof(methods[0]));
+    env->DeleteLocalRef(objectClass);
+  });
+}
+
+// static
+void IAPHandler::onSkuDetailsReceived(JNIEnv* env, jobject thiz, jstring sku) {
+  Q_UNUSED(thiz);
+
+  // From androidutils.cpp
+  const char* buffer = env->GetStringUTFChars(sku, nullptr);
+  if (!buffer) {
+    // oh no
+    return;
+  }
+  QString res = QString(buffer);
+  env->ReleaseStringUTFChars(sku, buffer);
+
+  logger.log() << "WHAT WE GOT BACK - OMG" << res;
 }
 
 void IAPHandler::registerProducts(const QByteArray& data) {

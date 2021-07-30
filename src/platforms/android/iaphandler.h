@@ -7,6 +7,7 @@
 
 #include <QAbstractListModel>
 #include <QList>
+#include "jni.h"
 
 class QJsonValue;
 
@@ -75,6 +76,7 @@ class IAPHandler final : public QAbstractListModel {
   IAPHandler(QObject* parent);
   ~IAPHandler();
 
+  static void onSkuDetailsReceived(JNIEnv* env, jobject thiz, jstring sku);
   void addProduct(const QJsonValue& value);
   void computeSavings();
 

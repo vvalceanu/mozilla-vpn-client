@@ -13,7 +13,6 @@ class AndroidVPNActivity {
  public:
   static void init();
   static bool handleBackButton(JNIEnv* env, jobject thiz);
-  static void onSkuDetailsReceived(JNIEnv* env, jobject thiz, jstring sku);
 
  private:
   AndroidVPNActivity();

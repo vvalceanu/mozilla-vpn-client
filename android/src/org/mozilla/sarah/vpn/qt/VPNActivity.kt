@@ -32,6 +32,4 @@ class VPNActivity : QtActivity() {
 
     // Returns true if MVPN has handled the back button
     external fun handleBackButton(): Boolean
-
-    external fun onSkuDetailsReceived(skuDetailsList: String);
 }

@@ -24,8 +24,6 @@ AndroidVPNActivity::AndroidVPNActivity() {
     // Hook in the native implementation for startActivityForResult into the JNI
     JNINativeMethod methods[]{
         {"handleBackButton", "()Z", reinterpret_cast<bool*>(handleBackButton)},
-        {"onSkuDetailsReceived", "(Ljava/lang/String;)V",
-         reinterpret_cast<void*>(onSkuDetailsReceived)},
     };
     QAndroidJniObject javaClass(CLASSNAME);
     QAndroidJniEnvironment env;
@@ -47,21 +45,4 @@ bool AndroidVPNActivity::handleBackButton(JNIEnv* env, jobject thiz) {
   Q_UNUSED(env);
   Q_UNUSED(thiz);
   return MozillaVPN::instance()->closeEventHandler()->eventHandled();
-}
-
-// static
-void AndroidVPNActivity::onSkuDetailsReceived(JNIEnv* env, jobject thiz,
-                                              jstring sku) {
-  Q_UNUSED(thiz);
-
-  // From androidutils.cpp
-  const char* buffer = env->GetStringUTFChars(sku, nullptr);
-  if (!buffer) {
-    // oh no
-    return;
-  }
-  QString res = QString(buffer);
-  env->ReleaseStringUTFChars(sku, buffer);
-
-  logger.log() << "The string" << res;
 }
