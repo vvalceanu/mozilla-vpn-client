@@ -43,6 +43,7 @@
 #  include "platforms/android/androidwebview.h"
 #  include "platforms/android/androidappimageprovider.h"
 #  include "platforms/android/androidutils.h"
+#  include "platforms/android/iaphandler.h"
 #endif
 
 #ifndef Q_OS_WIN
@@ -342,7 +343,7 @@ int CommandUI::run(QStringList& tokens) {
     qmlRegisterType<AndroidWebView>("Mozilla.VPN", 1, 0, "VPNAndroidWebView");
 #endif
 
-#ifdef MVPN_IOS
+#if defined(MVPN_IOS) || defined(MVPN_ANDROID)
     qmlRegisterSingletonType<MozillaVPN>(
         "Mozilla.VPN", 1, 0, "VPNIAP", [](QQmlEngine*, QJSEngine*) -> QObject* {
           QObject* obj = IAPHandler::instance();

@@ -63,16 +63,8 @@ IAPHandler::IAPHandler(QObject* parent) : QAbstractListModel(parent) {
   Q_ASSERT(!s_instance);
   s_instance = this;
 
-}
-
-IAPHandler::~IAPHandler() {
-  MVPN_COUNT_DTOR(IAPHandler);
-
-  Q_ASSERT(s_instance == this);
-  s_instance = nullptr;
-
   QtAndroid::runOnAndroidThreadSync([]() {
-    // Hook in the native implementation for onSkuDetailsReceived into the JNI
+    // Hook together implementation for onSkuDetailsReceived into the JNI
     JNINativeMethod methods[]{
         {"onSkuDetailsReceived", "(Ljava/lang/String;)V",
          reinterpret_cast<void*>(onSkuDetailsReceived)},
@@ -84,6 +76,13 @@ IAPHandler::~IAPHandler() {
                          sizeof(methods) / sizeof(methods[0]));
     env->DeleteLocalRef(objectClass);
   });
+}
+
+IAPHandler::~IAPHandler() {
+  MVPN_COUNT_DTOR(IAPHandler);
+
+  Q_ASSERT(s_instance == this);
+  s_instance = nullptr;
 }
 
 // static
@@ -105,6 +104,52 @@ void IAPHandler::onSkuDetailsReceived(JNIEnv* env, jobject thiz, jstring sku) {
 void IAPHandler::registerProducts(const QByteArray& data) {
   logger.log() << "Maybe register products" << data;
 
+  Q_ASSERT(m_productsRegistrationState == eRegistered ||
+           m_productsRegistrationState == eNotRegistered);
+
+  auto guard = qScopeGuard([&] { emit productsRegistered(); });
+
+  if (m_productsRegistrationState == eRegistered) {
+    return;
+  }
+
+  Q_ASSERT(m_products.isEmpty());
+
+  QJsonDocument json = QJsonDocument::fromJson(data);
+  if (!json.isObject()) {
+    logger.log() << "Object expected";
+    return;
+  }
+
+  QJsonObject obj = json.object();
+  if (!obj.contains("products")) {
+    logger.log() << "products entry expected";
+    return;
+  }
+
+  QJsonArray products = obj["products"].toArray();
+  if (products.isEmpty()) {
+    logger.log() << "No products found";
+    return;
+  }
+
+  m_productsRegistrationState = eRegistering;
+
+  for (const QJsonValue& value : products) {
+    addProduct(value);
+  }
+
+  if (m_products.isEmpty()) {
+    logger.log() << "No pending products (nothing has been registered). Unable "
+                    "to recover from "
+                    "this scenario.";
+    return;
+  }
+
+  logger.log() << "We are about to register" << m_products.size() << "products";
+
+  // This goes to native code, and then comes back via onSkuDetailsReceived
+  // where we then emit the productsRegistered() signal.
   auto appContext = QtAndroid::androidActivity().callObjectMethod(
       "getApplicationContext", "()Landroid/content/Context;");
   auto jniString = QAndroidJniObject::fromString(data);
@@ -113,6 +158,10 @@ void IAPHandler::registerProducts(const QByteArray& data) {
       "org/mozilla/sarah/vpn/InAppPurchase", "startBillingClient",
       "(Landroid/content/Context;Ljava/lang/String;)V", appContext.object(),
       jniString.object());
+
+  logger.log() << "Waiting for the products registration";
+
+  guard.dismiss();
 
   emit productsRegistered();
 }

@@ -38,9 +38,9 @@ data class GooglePlaySubscriptions(
 
 class InAppPurchase () {
 
-    companion object {
+    external fun onSkuDetailsReceived(subscriptionsDataJSONBlob: String);
 
-        external fun onSkuDetailsReceived(subscriptionsDataJSONBlob: String);
+    companion object {
 
         private const val TAG = "InAppPurchase"
 
@@ -86,7 +86,7 @@ class InAppPurchase () {
                                 }
                                 val subscriptionsDataJSONBlob = Json.encodeToString(googleProducts)
                                 Log.d(TAG, subscriptionsDataJSONBlob)
-                                onSkuDetailsReceived(subscriptionsDataJSONBlob)
+                                InAppPurchase().onSkuDetailsReceived(subscriptionsDataJSONBlob)
                             }
                         }
                         BillingClient.BillingResponseCode.SERVICE_DISCONNECTED,
