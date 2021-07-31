@@ -221,15 +221,6 @@ IAPHandler::Product* IAPHandler::findProduct(const QString& productIdentifier) {
   return nullptr;
 }
 
-void IAPHandler::startSubscription(const QString& productIdentifier) {
-  logger.log() << "Starting the subscription" << productIdentifier;
-  // TO DO
-}
-
-void IAPHandler::stopSubscription() {
-  logger.log() << "Stop subscription";
-  m_subscriptionState = eInactive;
-}
 
 void IAPHandler::unknownProductRegistered(const QString& identifier) {
   logger.log() << "Product registration failed:" << identifier;
@@ -284,15 +275,41 @@ void IAPHandler::productsRegistrationCompleted() {
   emit productsRegistered();
 }
 
-void IAPHandler::processCompletedTransactions(const QStringList& ids) {
-  logger.log() << "process completed transactions" << ids[0];
-  // TO DO
-}
+/* SUBSCRIBE */
 
 void IAPHandler::subscribe(const QString& productIdentifier) {
   logger.log() << "Subscription required" << productIdentifier;
   emit subscriptionStarted(productIdentifier);
 }
+
+void IAPHandler::startSubscription(const QString& productIdentifier) {
+  Q_ASSERT(m_productsRegistrationState == eRegistered);
+
+  Product* product = findProduct(productIdentifier);
+  Q_ASSERT(product);
+  Q_ASSERT(product->m_productNS);
+
+  if (m_subscriptionState != eInactive) {
+    logger.log() << "No multiple IAP!";
+    return;
+  }
+
+  m_subscriptionState = eActive;
+
+  logger.log() << "Starting the subscription" << productIdentifier;
+}
+
+void IAPHandler::stopSubscription() {
+  logger.log() << "Stop subscription";
+  m_subscriptionState = eInactive;
+}
+
+void IAPHandler::processCompletedTransactions(const QStringList& ids) {
+  logger.log() << "process completed transactions" << ids[0];
+  // TO DO
+}
+
+/* UTILS */
 
 void IAPHandler::computeSavings() {
   double monthlyPrice = 0;
