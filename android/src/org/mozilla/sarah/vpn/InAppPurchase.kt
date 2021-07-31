@@ -4,6 +4,7 @@
 
 package org.mozilla.sarah.vpn
 
+import android.app.Activity
 import android.util.Log
 import android.content.Context
 
@@ -45,23 +46,32 @@ class InAppPurchase () {
         private const val TAG = "InAppPurchase"
 
         @JvmStatic
-        fun startBillingClient(c: Context, p: String) {
-            Log.v(TAG, "startBillingClient manual with string: $p")
-            val mozillaProducts = Json.decodeFromString<MozillaSubscriptions>(p)
+        fun lookupProductsInPlayStore(c: Context, productsToLookup: String) {
+            Log.v(TAG, "startBillingClient for purchaseLookUp: $productsToLookup")
+            val mozillaProducts = Json.decodeFromString<MozillaSubscriptions>(productsToLookup)
             var googleProducts = GooglePlaySubscriptions(products=arrayListOf<GooglePlaySubscriptionInfo>())
 
-            val purchasesUpdatedListener =
-                PurchasesUpdatedListener { billingResult: BillingResult, purchases ->
-                    // To be implemented in a later section.
-                }
-
-            val billingClient = BillingClient.newBuilder(c)
-                .setListener(purchasesUpdatedListener)
-                .enablePendingPurchases()
-                .build()
-
+            // This billingClient only listens for the skudetails
+            val billingClient = BillingClient.newBuilder(c).build()
             billingClient.startConnection(object : BillingClientStateListener, SkuDetailsResponseListener {
+                override fun onBillingSetupFinished(billingResult: BillingResult) {
+                    if (billingResult.responseCode ==  BillingClient.BillingResponseCode.OK) {
+                        val productList = ArrayList<String>()
+                        for (product in mozillaProducts.products) {
+                            productList.add(product.id)
+                        }
+                        val params = SkuDetailsParams.newBuilder()
+                            .setType(BillingClient.SkuType.SUBS)
+                            .setSkusList(productList)
+                            .build()
+                        Log.v(TAG, "The params list is: ${params.skuType} ${params.skusList.toString()}")
+                        params.let { skuDetailsParams ->
+                            Log.i(TAG, "querySkuDetailsAsync")
+                            billingClient.querySkuDetailsAsync(skuDetailsParams, this)
+                        }
 
+                    }
+                }
                 override fun onSkuDetailsResponse(billingResult: BillingResult, skuDetailsList: MutableList<SkuDetails>?) {
                     val responseCode = billingResult.responseCode
                     val debugMessage = billingResult.debugMessage
@@ -69,10 +79,7 @@ class InAppPurchase () {
                         BillingClient.BillingResponseCode.OK -> {
                             Log.i(TAG, "onSkuDetailsResponse: $responseCode $debugMessage")
                             if (skuDetailsList == null) {
-                                Log.e(TAG, "onSkuDetailsResponse: " +
-                                        "Found null SkuDetails. " +
-                                        "Check to see if the SKUs you requested are correctly published " +
-                                        "in the Google Play Console.")
+                                Log.e(TAG,"Found null SkuDetails.")
                             } else {
                                 for (details in skuDetailsList) {
                                     googleProducts.products.add(
@@ -106,33 +113,84 @@ class InAppPurchase () {
                         }
                     }
                 }
+                override fun onBillingServiceDisconnected() {
+                    Log.i(TAG, "SkuDetails Billing Service Disconnected")
+                }
+            })
+        }
 
+        @JvmStatic
+        fun purchaseProduct(c: Context, productData: String, a: Activity) {
+            Log.v(TAG, "purchaseProduct: $productData")
+            val mozillaProducts = Json.decodeFromString<MozillaSubscriptions>(productData)
+            var googleProducts = GooglePlaySubscriptions(products=arrayListOf<GooglePlaySubscriptionInfo>())
+
+            val purchasesUpdatedListener =
+                PurchasesUpdatedListener { billingResult: BillingResult, purchases ->
+                    Log.i(TAG, "I'm in the purchasesUpdatedListener")
+                    Log.v(TAG, purchases.toString())
+                }
+
+            val billingClient = BillingClient.newBuilder(c)
+                .setListener(purchasesUpdatedListener)
+                .enablePendingPurchases()
+                .build()
+
+            billingClient.startConnection(object : BillingClientStateListener, SkuDetailsResponseListener {
                 override fun onBillingSetupFinished(billingResult: BillingResult) {
                     if (billingResult.responseCode ==  BillingClient.BillingResponseCode.OK) {
-                        val productList = ArrayList<String>()
-                        for (product in mozillaProducts.products) {
-                            productList.add(product.id)
-                        }
+                        require(mozillaProducts.products.size == 1)
                         val params = SkuDetailsParams.newBuilder()
                             .setType(BillingClient.SkuType.SUBS)
-                            .setSkusList(productList)
+                            .setSkusList(listOf(mozillaProducts.products[0].id))
                             .build()
-                        Log.v(TAG, "The params list is: ${params.skuType} ${params.skusList.toString()}")
                         params.let { skuDetailsParams ->
-                            Log.i(TAG, "querySkuDetailsAsync")
                             billingClient.querySkuDetailsAsync(skuDetailsParams, this)
                         }
 
                     }
                 }
-
+                override fun onSkuDetailsResponse(billingResult: BillingResult, skuDetailsList: MutableList<SkuDetails>?) {
+                    val responseCode = billingResult.responseCode
+                    val debugMessage = billingResult.debugMessage
+                    when (responseCode) {
+                        BillingClient.BillingResponseCode.OK -> {
+                            Log.i(TAG, "onSkuDetailsResponse: $responseCode $debugMessage")
+                            if (skuDetailsList == null) {
+                                Log.e(TAG,"Found null SkuDetails.")
+                            } else {
+                                require(skuDetailsList.size == 1)
+                                val skuDetails = skuDetailsList[0]
+                                val billingParams = BillingFlowParams.newBuilder()
+                                    .setSkuDetails(skuDetails)
+                                    .build()
+                                val billingResult = billingClient.launchBillingFlow(a, billingParams);
+                                val responseCode = billingResult.responseCode
+                                val debugMessage = billingResult.debugMessage
+                                Log.d(TAG, "launchBillingFlow: BillingResponse $responseCode $debugMessage")
+                            }
+                        }
+                        BillingClient.BillingResponseCode.SERVICE_DISCONNECTED,
+                        BillingClient.BillingResponseCode.SERVICE_UNAVAILABLE,
+                        BillingClient.BillingResponseCode.BILLING_UNAVAILABLE,
+                        BillingClient.BillingResponseCode.ITEM_UNAVAILABLE,
+                        BillingClient.BillingResponseCode.DEVELOPER_ERROR,
+                        BillingClient.BillingResponseCode.ERROR -> {
+                            Log.e(TAG, "purchaseProduct onSkuDetailsResponse: $responseCode $debugMessage")
+                        }
+                        BillingClient.BillingResponseCode.USER_CANCELED,
+                        BillingClient.BillingResponseCode.FEATURE_NOT_SUPPORTED,
+                        BillingClient.BillingResponseCode.ITEM_ALREADY_OWNED,
+                        BillingClient.BillingResponseCode.ITEM_NOT_OWNED -> {
+                            // These response codes are not expected.
+                            Log.wtf(TAG, "purchaseProduct onSkuDetailsResponse: $responseCode $debugMessage")
+                        }
+                    }
+                }
                 override fun onBillingServiceDisconnected() {
-                    // Try to restart the connection on the next request to
-                    // Google Play by calling the startConnection() method.
-                    Log.v(TAG, "BILLING SERVICE DISCONNECTED")
+                    Log.i(TAG, "purchaseProduct Billing Service Disconnected")
                 }
             })
-
         }
     }
 }

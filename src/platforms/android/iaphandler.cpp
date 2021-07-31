@@ -182,7 +182,7 @@ void IAPHandler::registerProducts(const QByteArray& data) {
   auto jniString = QAndroidJniObject::fromString(data);
 
   QAndroidJniObject::callStaticMethod<void>(
-      "org/mozilla/sarah/vpn/InAppPurchase", "startBillingClient",
+      "org/mozilla/sarah/vpn/InAppPurchase", "lookupProductsInPlayStore",
       "(Landroid/content/Context;Ljava/lang/String;)V", appContext.object(),
       jniString.object());
 
@@ -297,6 +297,18 @@ void IAPHandler::startSubscription(const QString& productIdentifier) {
   m_subscriptionState = eActive;
 
   logger.log() << "Starting the subscription" << productIdentifier;
+
+  // This goes to native code, and then comes back via onSkuDetailsReceived
+  // where we then emit the productsRegistered() signal.
+  auto appActivity = QtAndroid::androidActivity();
+  auto appContext = activity.callObjectMethod("getApplicationContext",
+                                              "()Landroid/content/Context;");
+  auto jniString = QAndroidJniObject::fromString(data);
+
+  QAndroidJniObject::callStaticMethod<void>(
+      "org/mozilla/sarah/vpn/InAppPurchase", "purchaseProduct",
+      "(Landroid/content/Context;Ljava/lang/String;Landroid/app/Activity)V",
+      appContext.object(), jniString.object(), appActivity.object());
 }
 
 void IAPHandler::stopSubscription() {
