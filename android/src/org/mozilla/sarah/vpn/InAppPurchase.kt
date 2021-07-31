@@ -39,7 +39,10 @@ data class GooglePlaySubscriptions(
 
 class InAppPurchase () {
 
-    external fun onSkuDetailsReceived(subscriptionsDataJSONBlob: String);
+    external fun onSkuDetailsReceived(subscriptionsDataJSONBlob: String)
+    external fun onPurchasesUpdated(purchasesData: String)
+    external fun onNoPurchases()
+
 
     companion object {
 
@@ -141,18 +144,12 @@ class InAppPurchase () {
             val mozillaProducts = Json.decodeFromString<MozillaSubscriptions>(productData)
             var googleProducts = GooglePlaySubscriptions(products=arrayListOf<GooglePlaySubscriptionInfo>())
 
-            val purchasesUpdatedListener =
-                PurchasesUpdatedListener { billingResult: BillingResult, purchases ->
-                    Log.i(TAG, "I'm in the purchasesUpdatedListener")
-                    Log.v(TAG, purchases.toString())
-                }
-
             val billingClient = BillingClient.newBuilder(c)
-                .setListener(purchasesUpdatedListener)
-                .enablePendingPurchases()
+                //.setListener(purchasesUpdatedListener)
+                //.enablePendingPurchases()
                 .build()
 
-            billingClient.startConnection(object : BillingClientStateListener, SkuDetailsResponseListener {
+            billingClient.startConnection(object : BillingClientStateListener, SkuDetailsResponseListener, PurchasesUpdatedListener {
                 override fun onBillingSetupFinished(billingResult: BillingResult) {
                     if (billingResult.responseCode ==  BillingClient.BillingResponseCode.OK) {
                         require(mozillaProducts.products.size == 1)
@@ -202,6 +199,20 @@ class InAppPurchase () {
                             Log.wtf(TAG, "purchaseProduct onSkuDetailsResponse: $responseCode $debugMessage")
                         }
                     }
+                }
+
+                override fun onPurchasesUpdated(billingResult: BillingResult, purchases: MutableList<Purchase>?) {
+                    Log.i(TAG, "I'm in the purchasesUpdatedListener")
+                    if (purchases != null) {
+                        for (purchase in purchases) {
+                            Log.v(TAG, purchase.originalJson)
+                            InAppPurchase().onPurchasesUpdated(purchase.originalJson)
+                        }
+                    } else {
+                        Log.e(TAG, "We got no purchase results back.")
+                        InAppPurchase().onNoPurchases()
+                    }
+                    billingClient.endConnection()
                 }
                 override fun onBillingServiceDisconnected() {
                     Log.i(TAG, "purchaseProduct Billing Service Disconnected")

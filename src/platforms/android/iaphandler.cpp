@@ -68,6 +68,8 @@ IAPHandler::IAPHandler(QObject* parent) : QAbstractListModel(parent) {
     JNINativeMethod methods[]{
         {"onSkuDetailsReceived", "(Ljava/lang/String;)V",
          reinterpret_cast<void*>(onSkuDetailsReceived)},
+        {"onPurchasesUpdated", "(Ljava/lang/String;)V",
+         reinterpret_cast<void*>(onPurchasesUpdated)},
     };
     QAndroidJniObject javaClass(CLASSNAME);
     QAndroidJniEnvironment env;
@@ -300,8 +302,7 @@ void IAPHandler::startSubscription(const QString& productIdentifier) {
   QList<Product> products = {*product};
   QJsonDocument productData = productsToJson(products);
 
-  // This goes to native code, and then comes back via onSkuDetailsReceived
-  // where we then emit the productsRegistered() signal.
+  // This goes to native code, and then comes back via onPurchaseUpdated
   auto appActivity = QtAndroid::androidActivity();
   auto appContext = appActivity.callObjectMethod("getApplicationContext",
                                                  "()Landroid/content/Context;");
@@ -314,13 +315,41 @@ void IAPHandler::startSubscription(const QString& productIdentifier) {
       appContext.object(), jniString.object(), appActivity.object());
 }
 
+// static
+void IAPHandler::onPurchasesUpdated(JNIEnv* env, jobject thiz, jstring sku) {
+  Q_UNUSED(thiz);
+
+  // From androidutils.cpp
+  const char* buffer = env->GetStringUTFChars(sku, nullptr);
+  if (!buffer) {
+    // oh no
+    return;
+  }
+  env->ReleaseStringUTFChars(sku, buffer);
+
+  QJsonDocument json = QJsonDocument::fromJson(buffer);
+  logger.log() << "onPurchasesUpdated" << json.toJson();
+  IAPHandler::instance()->stopSubscription();
+  // NEXT UP - make this pass through correctly and
+  // then fill in processCompletedTransactions
+  IAPHandler::instance()->processCompletedTransactions(json);
+}
+
+// static
+void IAPHandler::onNoPurchases(JNIEnv* env, jobject thiz) {
+  Q_UNUSED(env)
+  Q_UNUSED(thiz);
+  IAPHandler::instance()->stopSubscription();
+  IAPHandler::instance()->subscriptionFailed();
+}
+
 void IAPHandler::stopSubscription() {
   logger.log() << "Stop subscription";
   m_subscriptionState = eInactive;
 }
 
-void IAPHandler::processCompletedTransactions(const QStringList& ids) {
-  logger.log() << "process completed transactions" << ids[0];
+void IAPHandler::processCompletedTransactions(QJsonDocument json) {
+  logger.log() << "process completed transactions" << json.toJson();
   // TO DO
 }
 
@@ -332,7 +361,7 @@ QJsonDocument IAPHandler::productsToJson(QList<Product> products) {
   for (Product& p : products) {
     QJsonObject jsonProduct;
     jsonProduct["id"] = p.m_name;
-    jsonProduct["type"] = QString(p.m_type);
+    jsonProduct["type"] = QVariant::fromValue(p.m_type).toString();
     jsonProduct["featured_product"] = p.m_featuredProduct;
     jsonProducts.append(jsonProduct);
   }

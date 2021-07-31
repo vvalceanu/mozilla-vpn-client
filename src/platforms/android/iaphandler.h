@@ -70,13 +70,15 @@ class IAPHandler final : public QAbstractListModel {
   void unknownProductRegistered(const QString& identifier);
   void productRegistered(const QJsonValue& product);
   void productsRegistrationCompleted();
-  void processCompletedTransactions(const QStringList& ids);
+  void processCompletedTransactions(QJsonDocument json);
 
  private:
   IAPHandler(QObject* parent);
   ~IAPHandler();
 
   static void onSkuDetailsReceived(JNIEnv* env, jobject thiz, jstring sku);
+  static void onPurchasesUpdated(JNIEnv* env, jobject thiz, jstring sku);
+  static void onNoPurchases(JNIEnv* env, jobject thiz);
   void addProduct(const QJsonValue& value);
   void computeSavings();
 
