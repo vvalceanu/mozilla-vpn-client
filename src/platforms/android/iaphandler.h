@@ -68,7 +68,7 @@ class IAPHandler final : public QAbstractListModel {
 
   // Called by the delegate
   void unknownProductRegistered(const QString& identifier);
-  void productRegistered(void* product);
+  void productRegistered(const QJsonValue& product);
   void productsRegistrationCompleted();
   void processCompletedTransactions(const QStringList& ids);
 

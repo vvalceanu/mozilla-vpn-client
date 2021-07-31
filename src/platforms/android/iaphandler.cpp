@@ -76,6 +76,9 @@ IAPHandler::IAPHandler(QObject* parent) : QAbstractListModel(parent) {
                          sizeof(methods) / sizeof(methods[0]));
     env->DeleteLocalRef(objectClass);
   });
+
+  // IT IS HERE THAT WE SHOULD SET UP SOMETHING
+  // THAT CREATES THE ONE TRUE BILLINGCLIENT
 }
 
 IAPHandler::~IAPHandler() {
@@ -83,6 +86,9 @@ IAPHandler::~IAPHandler() {
 
   Q_ASSERT(s_instance == this);
   s_instance = nullptr;
+
+  // AND HERE THAT WE SHOULD DESTROY THE THING THAT SETS
+  // UP THE ONE TRUE BILLING CLIENT
 }
 
 // static
@@ -95,10 +101,31 @@ void IAPHandler::onSkuDetailsReceived(JNIEnv* env, jobject thiz, jstring sku) {
     // oh no
     return;
   }
-  QString res = QString(buffer);
   env->ReleaseStringUTFChars(sku, buffer);
 
-  logger.log() << "WHAT WE GOT BACK - OMG" << res;
+  QJsonDocument json = QJsonDocument::fromJson(buffer);
+  if (!json.isObject()) {
+    logger.log() << "onSkuDetailsReceived - object expected";
+    return;
+  }
+
+  QJsonObject obj = json.object();
+  if (!obj.contains("products")) {
+    logger.log() << "onSkuDetailsReceived - products entry expected";
+    return;
+  }
+
+  QJsonArray products = obj["products"].toArray();
+  if (products.isEmpty()) {
+    logger.log() << "onSkuDetailsRecieved - no products found";
+    return;
+  }
+
+  for (const QJsonValue& value : products) {
+    IAPHandler::instance()->productRegistered(value);
+  }
+
+  IAPHandler::instance()->productsRegistrationCompleted();
 }
 
 void IAPHandler::registerProducts(const QByteArray& data) {
@@ -162,8 +189,6 @@ void IAPHandler::registerProducts(const QByteArray& data) {
   logger.log() << "Waiting for the products registration";
 
   guard.dismiss();
-
-  emit productsRegistered();
 }
 
 void IAPHandler::addProduct(const QJsonValue& value) {
@@ -198,33 +223,105 @@ IAPHandler::Product* IAPHandler::findProduct(const QString& productIdentifier) {
 
 void IAPHandler::startSubscription(const QString& productIdentifier) {
   logger.log() << "Starting the subscription" << productIdentifier;
+  // TO DO
 }
 
 void IAPHandler::stopSubscription() {
   logger.log() << "Stop subscription";
+  m_subscriptionState = eInactive;
 }
 
 void IAPHandler::unknownProductRegistered(const QString& identifier) {
   logger.log() << "Product registration failed:" << identifier;
 }
 
-void IAPHandler::productRegistered(void* a_product) {
-  logger.log() << "Product registered" << a_product;
+void IAPHandler::productRegistered(const QJsonValue& product) {
+  logger.log() << "Product registered - " << product.toString();
+
+  Q_ASSERT(m_productsRegistrationState == eRegistering);
+
+  QString productIdentifier = product["sku"].toString();
+  Product* productData = findProduct(productIdentifier);
+  Q_ASSERT(productData);
+
+  logger.log() << "Id:" << productIdentifier;
+  logger.log() << "Title:" << product["title"].toString();
+  logger.log() << "Description:" << product["description"].toString();
+
+  QString priceValue = product["price"].toString();
+  logger.log() << "Price:" << priceValue;
+
+  /*
+    QString monthlyPriceValue;
+    int32_t mounthCount = productTypeToMonthCount(productData->m_type);
+    Q_ASSERT(mounthCount >= 1);
+
+    if (mounthCount == 1) {
+      monthlyPriceNS = priceValue;
+    } else {
+      monthlyPriceNS = priceValue / monthCount;
+    }
+    QString monthlyPriceValue = QString(monthlyPriceNS);
+
+    logger.log() << "Monthly Price:" << monthlyPriceValue; */
+
+  productData->m_price = priceValue;
+  productData->m_monthlyPrice = "13";
+  productData->m_nonLocalizedMonthlyPrice = 12.222;
 }
 
 void IAPHandler::productsRegistrationCompleted() {
   logger.log() << "All the products has been registered";
+
+  beginResetModel();
+
+  computeSavings();
+
+  m_productsRegistrationState = eRegistered;
+
+  endResetModel();
+
+  emit productsRegistered();
 }
 
 void IAPHandler::processCompletedTransactions(const QStringList& ids) {
   logger.log() << "process completed transactions" << ids[0];
+  // TO DO
 }
 
 void IAPHandler::subscribe(const QString& productIdentifier) {
   logger.log() << "Subscription required" << productIdentifier;
+  emit subscriptionStarted(productIdentifier);
 }
 
 void IAPHandler::computeSavings() {
+  double monthlyPrice = 0;
+  // Let's find the price for the monthly payment.
+  for (const Product& product : m_products) {
+    if (product.m_type == ProductMonthly) {
+      monthlyPrice = product.m_nonLocalizedMonthlyPrice;
+      break;
+    }
+  }
+
+  if (monthlyPrice == 0) {
+    logger.log() << "No monthly payment found";
+    return;
+  }
+
+  // Compute the savings for all the other types.
+  for (Product& product : m_products) {
+    if (product.m_type == ProductMonthly) continue;
+
+    int savings =
+        qRound(100.00 -
+               ((product.m_nonLocalizedMonthlyPrice * 100.00) / monthlyPrice));
+    if (savings < 0 || savings > 100) continue;
+
+    product.m_savings = (int)savings;
+
+    logger.log() << "Saving" << product.m_savings << "for" << product.m_name;
+  }
 }
 
 QHash<int, QByteArray> IAPHandler::roleNames() const {
@@ -238,7 +335,13 @@ QHash<int, QByteArray> IAPHandler::roleNames() const {
   return roles;
 }
 
-int IAPHandler::rowCount(const QModelIndex&) const { return 1; }
+int IAPHandler::rowCount(const QModelIndex&) const {
+  if (m_productsRegistrationState != eRegistered) {
+    return 0;
+  }
+
+  return m_products.count();
+}
 
 QVariant IAPHandler::data(const QModelIndex& index, int role) const {
   if (m_productsRegistrationState != eRegistered || !index.isValid()) {
