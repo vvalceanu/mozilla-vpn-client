@@ -51,13 +51,28 @@ class InAppPurchase () {
             val mozillaProducts = Json.decodeFromString<MozillaSubscriptions>(productsToLookup)
             var googleProducts = GooglePlaySubscriptions(products=arrayListOf<GooglePlaySubscriptionInfo>())
 
+            val purchasesUpdatedListener =
+                PurchasesUpdatedListener { billingResult: BillingResult, purchases ->
+                    Log.i(TAG, "I'm in the purchasesUpdatedListener that's used for looking up products. Nothing should happen here.")
+                    Log.v(TAG, purchases.toString())
+                }
+
+            Log.i(TAG, "A")
+
             // This billingClient only listens for the skudetails
-            val billingClient = BillingClient.newBuilder(c).build()
+            val billingClient = BillingClient.newBuilder(c)
+                .setListener(purchasesUpdatedListener)
+                .enablePendingPurchases()
+                .build()
+
+            Log.i(TAG, "B")
+
             billingClient.startConnection(object : BillingClientStateListener, SkuDetailsResponseListener {
                 override fun onBillingSetupFinished(billingResult: BillingResult) {
                     if (billingResult.responseCode ==  BillingClient.BillingResponseCode.OK) {
                         val productList = ArrayList<String>()
                         for (product in mozillaProducts.products) {
+                            Log.i(TAG, "C")
                             productList.add(product.id)
                         }
                         val params = SkuDetailsParams.newBuilder()
@@ -94,6 +109,7 @@ class InAppPurchase () {
                                 val subscriptionsDataJSONBlob = Json.encodeToString(googleProducts)
                                 Log.d(TAG, subscriptionsDataJSONBlob)
                                 InAppPurchase().onSkuDetailsReceived(subscriptionsDataJSONBlob)
+                                billingClient.endConnection();
                             }
                         }
                         BillingClient.BillingResponseCode.SERVICE_DISCONNECTED,

@@ -81,7 +81,6 @@ class IAPHandler final : public QAbstractListModel {
   void computeSavings();
 
   static ProductType productTypeToEnum(const QString& type);
-
   static uint32_t productTypeToMonthCount(ProductType type);
 
  private:
@@ -111,6 +110,7 @@ class IAPHandler final : public QAbstractListModel {
   };
 
   Product* findProduct(const QString& productIdentifier);
+  static QJsonDocument productsToJson(QList<Product> products);
 
   QList<Product> m_products;
 

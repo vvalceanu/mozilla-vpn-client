@@ -287,7 +287,6 @@ void IAPHandler::startSubscription(const QString& productIdentifier) {
 
   Product* product = findProduct(productIdentifier);
   Q_ASSERT(product);
-  Q_ASSERT(product->m_productNS);
 
   if (m_subscriptionState != eInactive) {
     logger.log() << "No multiple IAP!";
@@ -298,16 +297,20 @@ void IAPHandler::startSubscription(const QString& productIdentifier) {
 
   logger.log() << "Starting the subscription" << productIdentifier;
 
+  QList<Product> products = {*product};
+  QJsonDocument productData = productsToJson(products);
+
   // This goes to native code, and then comes back via onSkuDetailsReceived
   // where we then emit the productsRegistered() signal.
   auto appActivity = QtAndroid::androidActivity();
-  auto appContext = activity.callObjectMethod("getApplicationContext",
-                                              "()Landroid/content/Context;");
-  auto jniString = QAndroidJniObject::fromString(data);
+  auto appContext = appActivity.callObjectMethod("getApplicationContext",
+                                                 "()Landroid/content/Context;");
+  auto jniString =
+      QAndroidJniObject::fromString(productData.toJson(QJsonDocument::Compact));
 
   QAndroidJniObject::callStaticMethod<void>(
       "org/mozilla/sarah/vpn/InAppPurchase", "purchaseProduct",
-      "(Landroid/content/Context;Ljava/lang/String;Landroid/app/Activity)V",
+      "(Landroid/content/Context;Ljava/lang/String;Landroid/app/Activity;)V",
       appContext.object(), jniString.object(), appActivity.object());
 }
 
@@ -322,6 +325,21 @@ void IAPHandler::processCompletedTransactions(const QStringList& ids) {
 }
 
 /* UTILS */
+
+// static
+QJsonDocument IAPHandler::productsToJson(QList<Product> products) {
+  QJsonArray jsonProducts;
+  for (Product& p : products) {
+    QJsonObject jsonProduct;
+    jsonProduct["id"] = p.m_name;
+    jsonProduct["type"] = QString(p.m_type);
+    jsonProduct["featured_product"] = p.m_featuredProduct;
+    jsonProducts.append(jsonProduct);
+  }
+  QJsonObject root;
+  root.insert("products", jsonProducts);
+  return QJsonDocument(root);
+}
 
 void IAPHandler::computeSavings() {
   double monthlyPrice = 0;
