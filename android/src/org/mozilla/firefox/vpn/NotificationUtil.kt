@@ -102,8 +102,7 @@ object NotificationUtil {
         val pendingIntent = PendingIntent.getActivity(service, 0, intent, 0)
         // Build our notification
         sNotificationBuilder?.let {
-            it.setSmallIcon(org.mozilla.firefox.vpn.R.drawable.ic_mozvpn_round)
-                .setContentTitle(header)
+                it.setContentTitle(header)
                 .setContentText(message)
                 .setOnlyAlertOnce(true)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)

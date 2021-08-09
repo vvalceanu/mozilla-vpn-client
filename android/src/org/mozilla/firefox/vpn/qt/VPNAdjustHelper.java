@@ -7,10 +7,9 @@ package org.mozilla.firefox.vpn.qt;
 import com.adjust.sdk.Adjust;
 import com.adjust.sdk.AdjustEvent;
 
-import org.mozilla.firefox.vpn.BuildConfig;
+import org.mozilla.sarah.vpn.BuildConfig;
 
 public class VPNAdjustHelper {
-  
   private VPNAdjustHelper() {}
 
   public static void trackEvent(String event) {

@@ -8,7 +8,7 @@ import com.adjust.sdk.Adjust;
 import com.adjust.sdk.AdjustConfig;
 import com.adjust.sdk.LogLevel;
 
-import org.mozilla.firefox.vpn.BuildConfig;
+import org.mozilla.sarah.vpn.BuildConfig;
 
 public class VPNApplication extends org.qtproject.qt5.android.bindings.QtApplication {
 

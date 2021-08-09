@@ -9,6 +9,7 @@ import java.io.File
 import java.time.LocalDateTime
 import android.util.Log as nativeLog
 
+
 /*
  * Drop in replacement for android.util.Log 
  * Also stores a copy of all logs in tmp/mozilla_deamon_logs.txt
@@ -33,22 +34,22 @@ class Log {
         }
         fun i(tag: String, message: String) {
             instance?.write("[info] - ($tag) - $message")
-            if (!BuildConfig.DEBUG) { return; }
+           
             nativeLog.i(tag, message)
         }
         fun v(tag: String, message: String) {
             instance?.write("($tag) - $message")
-            if (!BuildConfig.DEBUG) { return; }
+           
             nativeLog.v(tag, message)
         }
         fun e(tag: String, message: String) {
             instance?.write("[error] - ($tag) - $message")
-            if (!BuildConfig.DEBUG) { return; }
+           
             nativeLog.e(tag, message)
         }
         // Only Prints && Loggs when in debug, noop in release.
         fun sensitive(tag: String, message: String?) {
-            if (!BuildConfig.DEBUG) { return; }
+           
             if (message == null) { return; }
             e(tag, message)
         }
