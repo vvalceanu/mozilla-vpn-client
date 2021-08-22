@@ -150,6 +150,7 @@ class MozillaVPN final : public QObject {
                                        const QString& subject,
                                        const QString& issueText,
                                        const QString& category);
+  Q_INVOKABLE void launchPlayStore();
 
   // Internal object getters:
   CaptivePortal* captivePortal() { return &m_private->m_captivePortal; }
