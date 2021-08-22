@@ -156,12 +156,14 @@ void AndroidIAPHandler::updateProductsInfo(const QJsonArray& returnedProducts) {
 }
 
 void AndroidIAPHandler::nativeStartSubscription(Product* product) {
-  auto jniString = QAndroidJniObject::fromString(product->m_name);
+  auto jniProductName = QAndroidJniObject::fromString(product->m_name);
+  auto jniFxaId =
+      QAndroidJniObject::fromString(MozillaVPN::instance()->user()->email());
   auto appActivity = QtAndroid::androidActivity();
   QAndroidJniObject::callStaticMethod<void>(
       "org/mozilla/firefox/vpn/InAppPurchase", "purchaseProduct",
-      "(Ljava/lang/String;Landroid/app/Activity;)V", jniString.object(),
-      appActivity.object());
+      "(Ljava/lang/String;Landroid/app/Activity;Ljava/lang/String;)V",
+      jniProductName.object(), appActivity.object(), jniFxaId.object());
 }
 
 // static
