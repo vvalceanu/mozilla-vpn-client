@@ -119,12 +119,8 @@ class InAppPurchase private constructor(ctx: Context) :
         }
 
         @JvmStatic
-        fun purchaseProduct(productToPurchase: String, activity: Activity, fxaId: String) {
-            instance?.initiatePurchase(
-                productToPurchase = productToPurchase,
-                activity = activity,
-                fxaId = fxaId
-            )
+        fun purchaseProduct(productToPurchase: String, activity: Activity) {
+            instance?.initiatePurchase(productToPurchase = productToPurchase, activity = activity)
         }
 
         @JvmStatic
@@ -253,7 +249,7 @@ class InAppPurchase private constructor(ctx: Context) :
         }
     }
 
-    fun initiatePurchase(productToPurchase: String, activity: Activity, fxaId: String) {
+    fun initiatePurchase(productToPurchase: String, activity: Activity) {
         val skuDetails = skusWithSkuDetails[productToPurchase]
         if (skuDetails == null) {
             Log.wtf(TAG, "Attempting to purchase a product with no skuDetails")
@@ -263,7 +259,8 @@ class InAppPurchase private constructor(ctx: Context) :
         val billingParams = BillingFlowParams
             .newBuilder()
             .setSkuDetails(skuDetails)
-            .setObfuscatedAccountId(fxaId)
+            // ToDo - https://github.com/mozilla-mobile/mozilla-vpn-client/issues/1537
+            // .setObfuscatedAccountId(fxaUid)
             .build()
         val billingResult = billingClient.launchBillingFlow(activity, billingParams)
         val responseCode = billingResult.responseCode
