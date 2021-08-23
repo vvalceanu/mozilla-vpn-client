@@ -810,7 +810,7 @@ void MozillaVPN::reset(bool forceInitialState) {
   m_private->m_keys.forgetKeys();
   m_private->m_serverData.forget();
 
-  if (FeatureList::instance()->inAppPurchaseSupported()) {
+  if (FeatureInAppPurchase::instance()->isSupported()) {
     IAPHandler* iap = IAPHandler::instance();
     iap->stopSubscription();
     iap->cancelProductsRegistration();
