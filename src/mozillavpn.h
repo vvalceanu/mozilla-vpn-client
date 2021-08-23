@@ -54,6 +54,7 @@ class MozillaVPN final : public QObject {
     StateSubscriptionBlocked,
     StateSubscriptionNeeded,
     StateSubscriptionInProgress,
+    StateSubscriptionNotValidated,
     StateTelemetryPolicy,
     StateUpdateRequired,
   };
@@ -235,7 +236,7 @@ class MozillaVPN final : public QObject {
 
   [[nodiscard]] bool setServerList(const QByteArray& serverData);
 
-  void reset(bool forceInitialState);
+  Q_INVOKABLE void reset(bool forceInitialState);
 
   bool modelsInitialized() const;
 
@@ -292,6 +293,7 @@ class MozillaVPN final : public QObject {
   void subscriptionFailedInternal(bool canceledByUser);
   void alreadySubscribed();
   void billingNotAvailable();
+  void subscriptionNotValidated();
 
   void completeActivation();
 
