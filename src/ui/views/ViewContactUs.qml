@@ -23,7 +23,7 @@ Item {
     function createSupportTicket(email, subject, issueText, category) {
         mainStackView.push("../components/VPNLoader.qml", {
             footerLinkIsVisible: false
-        });
+        }, StackView.Immediate);
         VPN.createSupportTicket(email, subject, issueText, category);
     }
 
@@ -49,8 +49,9 @@ Item {
         Connections {
             target: VPN
             function onTicketCreationAnswer(successful) {
-                if(successful) {
-                    mainStackView.replace(thankYouView);
+                if(true) {
+                    mainStackView.replace(thankYouView, StackView.Immediate);
+
                 } else {
                     mainStackView.replace("../views/ViewErrorFullScreen.qml", {
                         //% "Error submitting your support request..."
@@ -63,7 +64,7 @@ Item {
                         buttonText: VPNl18n.InAppSupportWorkflowSupportErrorButton,
                         buttonOnClick: contactUsRoot.tryAgain,
                         buttonObjectName: "errorTryAgainButton"
-                        }
+                        }, StackView.Immediate
                     );
                 }
             }
@@ -93,7 +94,6 @@ Item {
                 spacing: Theme.windowMargin
                 anchors.margins: Theme.windowMargin * 2
                 anchors.topMargin: window.fullscreenRequired() ? Theme.contentTopMarginMobile : Theme.contentTopMarginDesktop
-
 
                 ColumnLayout {
                     Layout.alignment: Qt.AlignTop
@@ -341,6 +341,14 @@ Item {
                      anchors.bottomMargin = Theme.windowMargin * 4
                  }
                }
+            }
+            Component.onCompleted: fade.start()
+            PropertyAnimation on opacity {
+                id: fade
+
+                from: 0
+                to: 1
+                duration: 200
             }
         }
     }

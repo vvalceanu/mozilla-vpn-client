@@ -22,10 +22,10 @@ VPNFlickable {
     property var getHelpLinkVisible: false
     property var statusLinkVisible: false
     id: vpnFlickable
+    flickContentHeight: col.implicitHeight
 
-    Component.onCompleted: {
-        flickContentHeight = col.childrenRect.height
-    }
+    Component.onCompleted: fade.start()
+
 
     VPNHeaderLink {
         id: headerLink
@@ -153,6 +153,15 @@ VPNFlickable {
 
         VPNVerticalSpacer {
             Layout.preferredHeight: fullscreenRequired() ? Theme.windowMargin : 1
+        }
+
+
+        PropertyAnimation on opacity {
+            id: fade
+
+            from: 0
+            to: 1
+            duration: 200
         }
     }
 }
