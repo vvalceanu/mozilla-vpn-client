@@ -11,7 +11,7 @@
 #include <QJsonValue>
 #include <QTextStream>
 
-#ifdef QT_DEBUG
+#ifdef MVPN_DEBUG
 #  include <QRandomGenerator>
 #endif
 

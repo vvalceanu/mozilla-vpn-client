@@ -13,7 +13,7 @@
 #include "settingsholder.h"
 #include "systemtrayhandler.h"
 
-#ifdef QT_DEBUG
+#ifdef MVPN_DEBUG
 #  include "gleantest.h"
 #endif
 
@@ -656,7 +656,7 @@ static QList<WebSocketCommand> s_commands{
           return QJsonObject();
         }},
 
-#ifdef QT_DEBUG
+#ifdef MVPN_DEBUG
     WebSocketCommand{"last_glean_request", "Retrieve the last glean request", 0,
                      [](const QList<QByteArray>&) {
                        GleanTest* gt = GleanTest::instance();
