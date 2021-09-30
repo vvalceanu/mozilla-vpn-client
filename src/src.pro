@@ -961,7 +961,4 @@ debug {
 mvpn_debug {
     message(MVPN Debug enabled)
     DEFINES += MVPN_DEBUG
-
-    SOURCES += gleantest.cpp
-    HEADERS += gleantest.h
 }
