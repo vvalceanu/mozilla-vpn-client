@@ -744,6 +744,8 @@ else:ios {
     QMAKE_TARGET_BUNDLE_PREFIX = org.mozilla.ios
     QT += svg
     QT += gui-private
+    QT += sql
+    QTPLUGIN += qsqlite
 
     CONFIG += c++1z
 

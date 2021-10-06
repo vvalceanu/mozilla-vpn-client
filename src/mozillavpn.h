@@ -139,6 +139,7 @@ class MozillaVPN final : public QObject {
   Q_INVOKABLE void hideUpdateRecommendedAlert() { setUpdateRecommended(false); }
   Q_INVOKABLE void postAuthenticationCompleted();
   Q_INVOKABLE void telemetryPolicyCompleted();
+  Q_INVOKABLE void mainWindowLoaded();
   Q_INVOKABLE void viewLogs();
   Q_INVOKABLE void retrieveLogs();
   Q_INVOKABLE void cleanupLogs();
@@ -347,8 +348,9 @@ class MozillaVPN final : public QObject {
   void updatingChanged();
 
   // For Glean
+  void initializeGlean();
   void sendGleanPings();
-  void triggerGleanSample(const QString& gleanSampleName);
+  void recordGleanEvent(const QString& gleanSampleName);
 
   void aboutToQuit();
 
