@@ -2,8 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import QtQuick 2.5
+import QtQuick 2.15
 import QtQuick.Controls 2.14
+import QtQuick.LocalStorage 2.15
 import QtQuick.Window 2.12
 import Mozilla.VPN 1.0
 import "./components"
@@ -61,11 +62,23 @@ Window {
             maximumWidth = Theme.desktopAppWidth;
             minimumWidth = Theme.desktopAppWidth;
         }
+
+        // The name of the file that will hold the SQLite database.
+        const DATABASE_NAME = "Glean";
+        // Estimated size of database file.
+        // This estimate is calculated by (rounding off and)
+        // doubling the 95th percentile  of glean-core's database size on Android (150Kb).
+        // https://glam.telemetry.mozilla.org/fenix/probe/glean_database_size/explore?app_id=release&timeHorizon=ALL
+        const ESTIMATED_DATABASE_SIZE = 150 * 2 * 10**3; // 300Kb in bytes
+
+        const dbHandle = LocalStorage.openDatabaseSync(DATABASE_NAME, "1.0", `${DATABASE_NAME} Storage`, ESTIMATED_DATABASE_SIZE);
+
         if (VPN.debugMode) {
             // Set-up debug properties for pings in debug mode
             Glean.initialize(VPN.gleanApplicationId, VPNSettings.gleanEnabled, {
                 appBuild: "MozillaVPN/" + VPN.versionString,
                 appDisplayVersion: VPN.versionString,
+                dbHandle: dbHandle,
                 debug: {
                     logPings: true,
                     debugViewTag: "MozillaVPN"
@@ -75,6 +88,7 @@ Window {
             Glean.initialize(VPN.gleanApplicationId, VPNSettings.gleanEnabled, {
                 appBuild: "MozillaVPN/" + VPN.versionString,
                 appDisplayVersion: VPN.versionString,
+                dbHandle: dbHandle,
             });
         }
     }
