@@ -653,9 +653,11 @@ class Context {
         Context.instance._uploadEnabled = upload;
     }
     static set dbHandle(dbHandle) {
+        log(context_LOG_TAG, ["Set dbHandle",], LoggingLevel.Debug);
         Context.instance._dbHandle = dbHandle;
     }
     static get dbHandle() {
+        log(context_LOG_TAG, ["Get dbHandle",], LoggingLevel.Debug);
         return Context.instance._dbHandle;
     }
     static get metricsDatabase() {
@@ -1023,13 +1025,14 @@ class QMLStore {
         this.tableName = tableName;
         this.initialized = this._executeQuery(`CREATE TABLE IF NOT EXISTS ${tableName}(key VARCHAR(255), value VARCHAR(255));`);
         this.logTag = `${storage_LOG_TAG}.${tableName}`;
-        this.dbHandle = Context.dbHandle;
     }
     _createKeyFromIndex(index) {
         return index.join(SEPARATOR);
     }
     _executeQuery(query) {
-        const handle = this.dbHandle;
+        log(this.logTag, [`Executing LocalStorage query: ${query}.`,], LoggingLevel.Debug);
+        const handle = Context.dbHandle;
+        log(this.logTag, ["Have handle",], LoggingLevel.Debug);
         return new Promise((resolve, reject) => {
             try {
                 handle.transaction((tx) => {
@@ -1064,6 +1067,7 @@ class QMLStore {
     }
     get(index = []) {
         return __awaiter(this, void 0, void 0, function* () {
+            log(this.logTag, ["At start of Get",], LoggingLevel.Info);
             if (index.length === 0) {
                 return this._getWholeStore();
             }
@@ -5895,6 +5899,8 @@ function getPingHeaders() {
 }
 function collectPing(ping, reason) {
     return __awaiter(this, void 0, void 0, function* () {
+        log(maker_LOG_TAG, ["before eventsDatabase.getPingEvents"], LoggingLevel.Info);
+        log(maker_LOG_TAG, ["eventsDatabase type", typeof (Context.eventsDatabase)], LoggingLevel.Info);
         const eventsData = yield Context.eventsDatabase.getPingEvents(ping.name, true);
         const metricsData = yield Context.metricsDatabase.getPingMetrics(ping.name, true);
         if (!metricsData && !eventsData) {
@@ -6264,7 +6270,7 @@ class Glean {
         const correctConfig = new Configuration(config);
         Context.debugOptions = correctConfig.debug;
         Glean.instance._config = correctConfig;
-        Context.dbHandle = correctConfig.dbHandle;
+        Context.dbHandle = config === null || config === void 0 ? void 0 : config.dbHandle;
         Context.metricsDatabase = new database(Glean.platform.Storage);
         Context.eventsDatabase = new events_database(Glean.platform.Storage);
         Context.pingsDatabase = new pings_database(Glean.platform.Storage);
