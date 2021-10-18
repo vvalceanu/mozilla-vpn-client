@@ -6,6 +6,7 @@
 #define SERVERCOUNTRYMODEL_H
 
 #include "servercountry.h"
+#include "servercountrymapmodel.h"
 
 #include <QAbstractListModel>
 #include <QByteArray>
@@ -59,6 +60,8 @@ class ServerCountryModel final : public QAbstractListModel {
 
   void retranslate();
 
+  ServerCountryMapModel* mapModel() { return &m_mapModel; }
+
   // QAbstractListModel methods
 
   QHash<int, QByteArray> roleNames() const override;
@@ -79,6 +82,8 @@ class ServerCountryModel final : public QAbstractListModel {
   void sortCountries();
 
  private:
+  ServerCountryMapModel m_mapModel;
+
   QByteArray m_rawJson;
   QByteArray m_rawExtraJson;
 

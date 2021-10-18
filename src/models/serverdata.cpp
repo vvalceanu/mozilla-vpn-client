@@ -5,6 +5,7 @@
 #include "serverdata.h"
 #include "leakdetector.h"
 #include "logger.h"
+#include "mozillavpn.h"
 #include "servercountrymodel.h"
 #include "serveri18n.h"
 #include "settingsholder.h"
@@ -118,4 +119,51 @@ QString ServerData::toString() const {
 
   result += m_exitCityName + ", " + m_exitCountryCode;
   return result;
+}
+
+double ServerData::exitLatitude() const {
+  if (!m_initialized) {
+    return 0;
+  }
+
+  const ServerCity* city = currentExitCity();
+  if (!city) {
+    return 0;
+  }
+
+  return city->latitude();
+}
+
+double ServerData::exitLongitude() const {
+  if (!m_initialized) {
+    return 0;
+  }
+
+  const ServerCity* city = currentExitCity();
+  if (!city) {
+    return 0;
+  }
+
+  return city->longitude();
+}
+
+const ServerCity* ServerData::currentExitCity() const {
+  if (!m_initialized) {
+    return nullptr;
+  }
+
+  ServerCountryModel* scm = MozillaVPN::instance()->serverCountryModel();
+  Q_ASSERT(scm);
+
+  for (const ServerCountry& country : scm->countries()) {
+    if (country.code() == m_exitCountryCode) {
+      for (const ServerCity& city : country.cities()) {
+        if (city.name() == m_exitCityName) {
+          return &city;
+        }
+      }
+    }
+  }
+
+  return nullptr;
 }

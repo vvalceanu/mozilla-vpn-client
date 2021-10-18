@@ -120,6 +120,7 @@ splittunnel:
   infoLinkText: Learn more
 
 multiHopFeature:
+  mapCTA: Map
   singleHopToggleCTA: Single-hop
   multiHopToggleCTA: Multi-hop
   multiHopCardHeader: What is multi-hop VPN?

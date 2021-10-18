@@ -54,6 +54,10 @@ Item {
             tabButtonId: "tabSingleHop"
         }
         ListElement {
+            tabLabelStringId: "MultiHopFeatureMapCTA"
+            tabButtonId: "tabMap"
+        }
+        ListElement {
             tabLabelStringId: "MultiHopFeatureMultiHopToggleCTA"
             tabButtonId: "tabMultiHop"
         }
@@ -83,6 +87,9 @@ Item {
                 }
                 showRecentConnections: true
 
+            },
+            VPNServerMap {
+                id: map
             }
         ]
 
@@ -90,6 +97,7 @@ Item {
             id: multiHopStackView
             visible: VPNFeatureList.get("multiHop").isSupported
         }
+
         handleTabClick: (tab) => {
             if (multiHopStackView && multiHopStackView.depth > 1) {
                 // Return to the Multi-hop main view when the Multi-hop tab
@@ -103,7 +111,8 @@ Item {
                 singleHopServerList.centerActiveServer();
                 return;
             }
-            else if (multiHopEntryServer[0] === "") {
+
+            if (multiHopEntryServer[0] === "") {
                 // Choose a random entry server when switching to multihop
                 multiHopEntryServer = VPNServerCountryModel.pickRandom();
             }

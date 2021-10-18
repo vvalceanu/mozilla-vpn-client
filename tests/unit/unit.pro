@@ -59,6 +59,7 @@ HEADERS += \
     ../../src/models/server.h \
     ../../src/models/servercity.h \
     ../../src/models/servercountry.h \
+    ../../src/models/servercountrymapmodel.h \
     ../../src/models/servercountrymodel.h \
     ../../src/models/serverdata.h \
     ../../src/models/serverextra.h \
@@ -149,6 +150,7 @@ SOURCES += \
     ../../src/models/server.cpp \
     ../../src/models/servercity.cpp \
     ../../src/models/servercountry.cpp \
+    ../../src/models/servercountrymapmodel.cpp \
     ../../src/models/servercountrymodel.cpp \
     ../../src/models/serverdata.cpp \
     ../../src/models/serverextra.cpp \

@@ -29,6 +29,9 @@ class ServerData final : public QObject {
   ServerData();
   ~ServerData();
 
+  Q_INVOKABLE double exitLatitude() const;
+  Q_INVOKABLE double exitLongitude() const;
+
   [[nodiscard]] bool fromSettings();
   [[nodiscard]] bool fromString(const QString& data);
 
@@ -68,6 +71,8 @@ class ServerData final : public QObject {
                           const QString& exitCityName,
                           const QString& entryCountryCode,
                           const QString& entryCityName);
+
+  const ServerCity* currentExitCity() const;
 
  private:
   bool m_initialized = false;

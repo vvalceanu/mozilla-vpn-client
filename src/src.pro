@@ -116,6 +116,7 @@ SOURCES += \
         models/server.cpp \
         models/servercity.cpp \
         models/servercountry.cpp \
+        models/servercountrymapmodel.cpp \
         models/servercountrymodel.cpp \
         models/serverdata.cpp \
         models/serverextra.cpp \
@@ -246,6 +247,7 @@ HEADERS += \
         models/server.h \
         models/servercity.h \
         models/servercountry.h \
+        models/servercountrymapmodel.h \
         models/servercountrymodel.h \
         models/serverdata.h \
         models/serverextra.h \
