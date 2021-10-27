@@ -298,7 +298,7 @@ Window {
                 };
             }
             var channel = VPN.stagingMode ? "staging" : "production";
-            console.debug("Initializing glean with channel set to:", channel);
+            console.debug("Initializing glean with channel set to:", channel, "| uploadEnabled set to:", VPNSettings.gleanEnabled);
             Glean.initialize("mozillavpn", VPNSettings.gleanEnabled, {
                 appBuild: "MozillaVPN/" + VPN.versionString,
                 appDisplayVersion: VPN.versionString,
