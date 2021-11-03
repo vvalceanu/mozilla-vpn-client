@@ -12,6 +12,8 @@
 #include "qmlengineholder.h"
 #include "serveri18n.h"
 #include "settingsholder.h"
+#include "inspectornetworkmanager.h"
+#include "networkrequest.h"
 
 #include <functional>
 
@@ -495,6 +497,32 @@ static QList<WebSocketCommand> s_commands{
                      [](const QList<QByteArray>&) {
                        MozillaVPN::instance()->heartbeatCompleted(
                            false /* success */);
+                       return QJsonObject();
+                     }},
+
+    WebSocketCommand{"nock_add", "Add a Network Request", 4,
+                     [](const QList<QByteArray>& args) {
+                        QJsonObject out;
+                        QVariant method(args.at(0));
+                        if(!method.canConvert<QString>()){
+                            out["error"]="Conversation Error: Method";
+                            return out;
+                        };
+                        QVariant path(args.at(1));
+                        if(!method.canConvert<QUrl>()){
+                            out["error"]="Conversation Error: Method";
+                            return out;
+                        };
+                        QVariant statusCode(args.at(2));
+                        if(!statusCode.canConvert<int>()){
+                            out["error"]="Conversation Error: statusCode";
+                            return out;
+                        };
+                        QByteArray responseBody(args.at(3));
+
+                        InspectorNetworkManager::instance()->addMockPath(path.toUrl(),method.toString(),statusCode.toInt(),responseBody,QByteArray());
+                        NetworkRequest::enableRequestMocking();
+
                        return QJsonObject();
                      }},
 

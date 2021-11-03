@@ -21,6 +21,8 @@ class NetworkRequest final : public QObject {
  public:
   ~NetworkRequest();
 
+    static void enableRequestMocking();
+
   // This object deletes itself at the end of the operation.
 
   static NetworkRequest* createForGetUrl(QObject* parent, const QString& url,

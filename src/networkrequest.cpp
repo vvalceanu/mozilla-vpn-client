@@ -12,6 +12,7 @@
 #include "networkmanager.h"
 #include "settingsholder.h"
 #include "mozillavpn.h"
+#include "inspector/inspectornetworkmanager.h"
 
 #include <QDirIterator>
 #include <QHostAddress>
@@ -34,6 +35,8 @@ constexpr const char* IPINFO_URL_IPV6 = "https://[%1]/api/v1/vpn/ipinfo";
 namespace {
 Logger logger(LOG_NETWORKING, "NetworkRequest");
 QList<QSslCertificate> s_intervention_certs;
+
+bool s_UseInspectorNetworkManager = false;
 }  // namespace
 
 NetworkRequest::NetworkRequest(QObject* parent, int status,
@@ -843,23 +846,38 @@ void NetworkRequest::timeout() {
 }
 
 void NetworkRequest::getRequest() {
-  QNetworkAccessManager* manager =
-      NetworkManager::instance()->networkAccessManager();
-  handleReply(manager->get(m_request));
+    QNetworkReply* reply= nullptr;
+    if(s_UseInspectorNetworkManager){
+        reply = InspectorNetworkManager::instance()->get(m_request);
+    }else{
+        reply=
+            NetworkManager::instance()->networkAccessManager()->get(m_request);
+    }
+  handleReply(reply);
   m_timer.start(REQUEST_TIMEOUT_MSEC);
 }
 
 void NetworkRequest::deleteRequest() {
-  QNetworkAccessManager* manager =
-      NetworkManager::instance()->networkAccessManager();
-  handleReply(manager->sendCustomRequest(m_request, "DELETE"));
+    QNetworkReply* reply= nullptr;
+    if(s_UseInspectorNetworkManager){
+        reply = InspectorNetworkManager::instance()->del(m_request);
+    }else{
+        reply=
+            NetworkManager::instance()->networkAccessManager()->sendCustomRequest(m_request, "DELETE");
+    }
+  handleReply(reply);
   m_timer.start(REQUEST_TIMEOUT_MSEC);
 }
 
 void NetworkRequest::postRequest(const QByteArray& body) {
-  QNetworkAccessManager* manager =
-      NetworkManager::instance()->networkAccessManager();
-  handleReply(manager->post(m_request, body));
+    QNetworkReply* reply= nullptr;
+    if(s_UseInspectorNetworkManager){
+        reply = InspectorNetworkManager::instance()->post(m_request,body);
+    }else{
+        reply=
+            NetworkManager::instance()->networkAccessManager()->post(m_request,body);
+    }
+  handleReply(reply);
   m_timer.start(REQUEST_TIMEOUT_MSEC);
 }
 
@@ -953,4 +971,8 @@ void NetworkRequest::enableSSLIntervention() {
   auto conf = QSslConfiguration::defaultConfiguration();
   conf.addCaCertificates(s_intervention_certs);
   m_request.setSslConfiguration(conf);
+}
+
+void NetworkRequest::enableRequestMocking(){
+    s_UseInspectorNetworkManager=true;
 }

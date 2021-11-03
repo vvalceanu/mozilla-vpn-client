@@ -95,6 +95,8 @@ SOURCES += \
         iaphandler.cpp \
         inspector/inspectorhttpconnection.cpp \
         inspector/inspectorhttpserver.cpp \
+        inspector/inspectornetworkmanager.cpp \
+        inspector/inspectornetworkreply.cpp \
         inspector/inspectorwebsocketconnection.cpp \
         inspector/inspectorwebsocketserver.cpp \
         ipaddress.cpp \
@@ -227,6 +229,8 @@ HEADERS += \
         iaphandler.h \
         inspector/inspectorhttpconnection.h \
         inspector/inspectorhttpserver.h \
+        inspector/inspectornetworkmanager.h \
+        inspector/inspectornetworkreply.h \
         inspector/inspectorwebsocketconnection.h \
         inspector/inspectorwebsocketserver.h \
         ipaddress.h \

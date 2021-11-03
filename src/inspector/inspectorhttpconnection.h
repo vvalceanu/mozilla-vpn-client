@@ -18,6 +18,8 @@ class InspectorHttpConnection final : public QObject {
   InspectorHttpConnection(QObject* parent, QTcpSocket* connection);
   ~InspectorHttpConnection();
 
+
+
  private:
   void readData();
 
