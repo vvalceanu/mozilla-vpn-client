@@ -1,5 +1,6 @@
 #### General notes, tips, etc.
 
+* These tests may only run on linux for now.
 * See the github workflow for steps to build, not much to it, just make sure you have the right qmake call.
 * You don't need to rerun `make` inbetween changes to `tst_*.qml` files.
 * It can be a struggle to get the thing you want to import imported. Don't struggle alone, ask for help. Hopefully it's

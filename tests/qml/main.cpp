@@ -39,8 +39,13 @@ class Setup : public QObject {
           return obj;
         });
 
-    engine->rootContext()->setContextProperty("myContextProperty",
-                                              QVariant(true));
+    qmlRegisterSingletonType<MozillaVPN>(
+        "Mozilla.VPN", 1, 0, "VPNWhatsNewModel",
+        [](QQmlEngine*, QJSEngine*) -> QObject* {
+          QObject* obj = MozillaVPN::instance()->whatsNewModel();
+          QQmlEngine::setObjectOwnership(obj, QQmlEngine::CppOwnership);
+          return obj;
+        });
   }
 };
 
