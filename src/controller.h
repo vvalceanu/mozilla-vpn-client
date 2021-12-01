@@ -76,6 +76,8 @@ class Controller final : public QObject {
 
   void cleanupBackendLogs();
 
+  bool excludeRunningApp(const QString& name, int pid);
+
   void getStatus(
       std::function<void(const QString& serverIpv4Gateway,
                          const QString& deviceIpv4Address, uint64_t txBytes,

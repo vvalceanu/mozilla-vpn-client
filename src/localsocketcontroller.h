@@ -37,6 +37,8 @@ class LocalSocketController final : public ControllerImpl {
 
   void cleanupBackendLogs() override;
 
+  bool excludeRunningApp(const QString& name, int pid) override;
+
  private:
   void activateNext();
   void daemonConnected();

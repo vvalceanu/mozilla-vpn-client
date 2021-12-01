@@ -638,6 +638,13 @@ void Controller::cleanupBackendLogs() {
   }
 }
 
+bool Controller::excludeRunningApp(const QString& name, int pid){
+  if(!m_impl){
+    return false;
+  }
+  return m_impl->excludeRunningApp(name,pid);
+}
+
 void Controller::getStatus(
     std::function<void(const QString& serverIpv4Gateway,
                        const QString& deviceIpv4Address, uint64_t txByte,

@@ -72,6 +72,7 @@ SOURCES += \
         commands/commandlogout.cpp \
         commands/commandselect.cpp \
         commands/commandservers.cpp \
+        commands/commandsplit.cpp \
         commands/commandstatus.cpp \
         commands/commandui.cpp \
         connectioncheck.cpp \
@@ -191,6 +192,7 @@ HEADERS += \
         commands/commandlogout.h \
         commands/commandselect.h \
         commands/commandservers.h \
+        commands/commandsplit.h \
         commands/commandstatus.h \
         commands/commandui.h \
         connectioncheck.h \

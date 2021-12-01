@@ -26,6 +26,8 @@ class DBusService final : public Daemon {
   void setAdaptor(DbusAdaptor* adaptor);
 
   using Daemon::activate;
+  void excludeRunningApp(const QString& app, int pid) override;
+
 
  public slots:
   bool activate(const QString& jsonConfig);

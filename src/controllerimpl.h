@@ -8,6 +8,7 @@
 #include "controller.h"
 
 #include <QObject>
+#include <QVariant>
 
 #include <functional>
 
@@ -69,6 +70,14 @@ class ControllerImpl : public QObject {
 
   // Cleanup the backend logs.
   virtual void cleanupBackendLogs() = 0;
+
+  // Excludes an app from the VPN without adding a permanent
+  // record. 
+  virtual bool excludeRunningApp(const QString& name, int pid) { 
+    Q_UNUSED(name); 
+    Q_UNUSED(pid);
+    return false;
+  };
 
  signals:
   // This signal is emitted when the controller is initialized. Note that the

@@ -422,3 +422,19 @@ void LocalSocketController::write(const QJsonObject& json) {
   m_socket->write(QJsonDocument(json).toJson(QJsonDocument::Compact));
   m_socket->write("\n");
 }
+
+bool LocalSocketController::excludeRunningApp(const QString& name, int pid){
+  #ifndef MVPN_LINUX
+    return false;
+  #endif
+
+  if(name.isNull()){
+    return false;
+  }
+  QJsonObject json;
+  json.insert("type", "excludeRunningApp");
+  json.insert("name", name);
+  json.insert("id", pid);
+  write(json);
+  return true;
+}

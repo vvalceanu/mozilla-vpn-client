@@ -157,3 +157,7 @@ void TimerController::getBackendLogs(
 }
 
 void TimerController::cleanupBackendLogs() { m_impl->cleanupBackendLogs(); }
+
+bool TimerController::excludeRunningApp(const QString& name, int pid){
+  return m_impl->excludeRunningApp(name,pid);
+};

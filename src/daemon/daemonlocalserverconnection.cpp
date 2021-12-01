@@ -132,6 +132,12 @@ void DaemonLocalServerConnection::parseCommand(const QByteArray& data) {
     Daemon::instance()->cleanLogs();
     return;
   }
+  if (type == "excludeRunningApp") {
+    auto name = obj["name"].toString();
+    auto id = obj["id"].toInt();
+    Daemon::instance()->excludeRunningApp(name,id);
+    return;
+  }
 
   logger.warning() << "Invalid command:" << type;
 }

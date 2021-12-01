@@ -133,6 +133,13 @@ void DBusService::appLaunched(const QString& name, int rootpid) {
   }
 }
 
+void DBusService::excludeRunningApp(const QString& name, int rootpid) {
+  logger.debug() << "Excluding Running app: "<<name<<"("<<rootpid <<")";
+  firewallApp(name, APP_STATE_EXCLUDED);
+  appLaunched(name,rootpid);
+}
+
+
 void DBusService::appTerminated(const QString& name, int rootpid) {
   logger.debug() << "terminate:" << name << "PID:" << rootpid;
 }

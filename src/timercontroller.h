@@ -41,6 +41,8 @@ class TimerController final : public ControllerImpl {
 
   void cleanupBackendLogs() override;
 
+  bool excludeRunningApp(const QString& name, int pid) override;
+
  private slots:
   void timeout();
 
