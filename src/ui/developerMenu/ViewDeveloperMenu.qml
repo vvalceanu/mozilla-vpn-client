@@ -16,7 +16,10 @@ VPNFlickable {
     property bool vpnIsOff: (VPNController.state === VPNController.StateOff) ||
         (VPNController.state === VPNController.StateInitializing)
 
+
     id: vpnFlickable
+    flickContentHeight:  restartRequired.y + restartRequired.height
+
     VPNMenu {
         id: menu
         title: VPNl18n.SettingsDevTitle
@@ -152,12 +155,82 @@ VPNFlickable {
         onClicked: stackview.push("qrc:/ui/developerMenu/ViewFeatureList.qml")
     }
 
+    RowLayout {
+        id: relayTokenRow
+        spacing: VPNTheme.theme.windowMargin
+        anchors.top: featureListLink.bottom
+        anchors.topMargin: VPNTheme.theme.windowMargin
+        width: parent.width - VPNTheme.theme.windowMargin
+
+        VPNCheckBox {
+            id: relayTokenCheckBox
+            Layout.leftMargin: 18
+            checked: VPNSettings.relayTokenEnabled
+            opacity: 1
+            onClicked: {
+                VPNSettings.relayTokenEnabled = !VPNSettings.relayTokenEnabled
+            }
+        }
+
+        ColumnLayout {
+            Layout.fillWidth: true
+            Layout.topMargin: 2
+            spacing: 4
+            Layout.alignment: Qt.AlignTop
+
+            VPNInterLabel {
+                Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
+                Layout.fillWidth: true
+                text: "Enable Relay integration"
+                color: VPNTheme.theme.fontColorDark
+                horizontalAlignment: Text.AlignLeft
+            }
+
+            VPNTextBlock {
+                Layout.fillWidth: true
+                text: "This is just a prototype"
+            }
+
+            VPNVerticalSpacer {
+                height: VPNTheme.theme.windowMargin
+            }
+
+            VPNTextField {
+                Layout.fillWidth: true
+                Layout.rightMargin: VPNTheme.theme.windowMargin
+
+                id: relayTokenInput
+
+                enabled: VPNSettings.relayTokenEnabled
+                placeholderText: "Relay token"
+                text: VPNSettings.relayToken
+                height: 40
+
+                PropertyAnimation on opacity {
+                    duration: 200
+                }
+
+                onTextChanged: text => {
+                    VPNSettings.relayToken = relayTokenInput.text;
+                }
+            }
+
+            Rectangle {
+                Layout.topMargin: VPNTheme.theme.windowMargin
+                Layout.preferredHeight: 1
+                Layout.fillWidth: true
+                color: "#E7E7E7"
+                visible: true
+            }
+        }
+    }
+
     VPNExternalLinkListItem {
         id:inspectorLink
         visible: stagingServerCheckBox.checked && !restartRequired.visible
-        anchors.top: featureListLink.bottom
+        anchors.top: relayTokenRow.bottom
         anchors.topMargin: VPNTheme.theme.windowMargin
-        anchors.left: stagingServerRow.left
+        anchors.left: relayTokenRow.left
         anchors.leftMargin: VPNTheme.theme.windowMargin/2
         width: parent.width - VPNTheme.theme.windowMargin
 

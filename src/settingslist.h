@@ -457,3 +457,19 @@ SETTING_STRING(theme,          // getter
                DEFAULT_THEME,  // default value
                true            // remove when reset
 )
+
+SETTING_BOOL(relayTokenEnabled,     // getter
+             setRelayTokenEnabled,  // setter
+             hasRelayTokenEnabled,  // has
+             "relayTokenEnabled",   // key
+             false,                 // default value
+             true                   // remove when reset
+)
+
+SETTING_STRING(relayToken,     // getter
+               setRelayToken,  // setter
+               hasRelayToken,  // has
+               "relayToken",   // key
+               "",             // default value
+               true            // remove when reset
+)
