@@ -127,6 +127,9 @@ class NetworkRequest final : public QObject {
                                                   const QString& purchaseToken);
 #endif
 
+  static NetworkRequest* createForRelayAddresses(Task* parent);
+  static NetworkRequest* createForRelayDeleteAddress(Task* parent, int id);
+
   void disableTimeout();
 
   int statusCode() const;

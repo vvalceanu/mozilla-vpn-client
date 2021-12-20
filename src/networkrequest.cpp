@@ -769,6 +769,53 @@ NetworkRequest* NetworkRequest::createForAndroidPurchase(
 }
 #endif
 
+NetworkRequest* NetworkRequest::createForRelayAddresses(Task* parent) {
+  Q_ASSERT(parent);
+
+  NetworkRequest* r = new NetworkRequest(parent, 200, false);
+  r->m_request.setHeader(QNetworkRequest::ContentTypeHeader,
+                         "application/json");
+  r->m_request.setRawHeader("accept", "application/json");
+
+  QUrl url(Constants::RELAY_URL);
+  url.setPath("/api/v1/relayaddresses/");
+  r->m_request.setUrl(url);
+
+  QByteArray authorizationHeader = "Token ";
+  authorizationHeader.append(
+      SettingsHolder::instance()->relayToken().toLocal8Bit());
+  r->m_request.setRawHeader("Authorization", authorizationHeader);
+
+  r->getRequest();
+  return r;
+}
+
+NetworkRequest* NetworkRequest::createForRelayDeleteAddress(Task* parent,
+                                                            int id) {
+  Q_ASSERT(parent);
+
+  NetworkRequest* r = new NetworkRequest(parent, 200, false);
+  r->m_request.setHeader(QNetworkRequest::ContentTypeHeader,
+                         "application/json");
+  r->m_request.setRawHeader("accept", "application/json");
+
+  QString path("/api/v1/relayaddresses/");
+  path.append(QString::number(id));
+  path.append("/");
+
+  QUrl url(Constants::RELAY_URL);
+  url.setPath(path);
+  r->m_request.setUrl(url);
+
+  QByteArray authorizationHeader = "Token ";
+  authorizationHeader.append(
+      SettingsHolder::instance()->relayToken().toLocal8Bit());
+  r->m_request.setRawHeader("Authorization", authorizationHeader);
+
+  r->deleteRequest();
+  return r;
+}
+
 void NetworkRequest::replyFinished() {
   Q_ASSERT(m_reply);
   Q_ASSERT(m_reply->isFinished());

@@ -18,6 +18,7 @@
 #include "models/helpmodel.h"
 #include "models/keys.h"
 #include "models/licensemodel.h"
+#include "models/relaymodel.h"
 #include "models/servercountrymodel.h"
 #include "models/serverdata.h"
 #include "models/supportcategorymodel.h"
@@ -106,7 +107,8 @@ class MozillaVPN final : public QObject {
     LinkUpdate,
     LinkInspector,
     LinkSubscriptionBlocked,
-    LinkSplitTunnelHelp
+    LinkSplitTunnelHelp,
+    LinkRelay,
   };
   Q_ENUM(LinkType)
 
@@ -215,6 +217,7 @@ class MozillaVPN final : public QObject {
   }
   Keys* keys() { return &m_private->m_keys; }
   LicenseModel* licenseModel() { return &m_private->m_licenseModel; }
+  RelayModel* relayModel() { return &m_private->m_relayModel; }
   HelpModel* helpModel() { return &m_private->m_helpModel; }
   NetworkWatcher* networkWatcher() { return &m_private->m_networkWatcher; }
   ReleaseMonitor* releaseMonitor() { return &m_private->m_releaseMonitor; }
@@ -412,6 +415,7 @@ class MozillaVPN final : public QObject {
     SupportCategoryModel m_supportCategoryModel;
     Keys m_keys;
     LicenseModel m_licenseModel;
+    RelayModel m_relayModel;
     HelpModel m_helpModel;
     NetworkWatcher m_networkWatcher;
     ReleaseMonitor m_releaseMonitor;

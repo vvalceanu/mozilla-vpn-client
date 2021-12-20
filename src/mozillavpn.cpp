@@ -518,15 +518,21 @@ void MozillaVPN::openLink(LinkType linkType) {
       url = NetworkRequest::apiBaseUrl();
       url.append("/r/vpn/subscriptionBlocked");
       break;
+
     case LinkSplitTunnelHelp:
       // TODO: This should link to a more helpful article
       url =
           "https://support.mozilla.org/kb/"
           "split-tunneling-use-mozilla-vpn-specific-apps-wind";
       break;
+
     case LinkInspector:
       Q_ASSERT(!Constants::inProduction());
       url = "https://mozilla-mobile.github.io/mozilla-vpn-client/inspector/";
+      break;
+
+    case LinkRelay:
+      url = Constants::RELAY_URL;
       break;
 
     default:

@@ -114,6 +114,7 @@ SOURCES += \
         models/helpmodel.cpp \
         models/keys.cpp \
         models/licensemodel.cpp \
+        models/relaymodel.cpp \
         models/server.cpp \
         models/servercity.cpp \
         models/servercountry.cpp \
@@ -245,6 +246,7 @@ HEADERS += \
         models/helpmodel.h \
         models/keys.h \
         models/licensemodel.h \
+        models/relaymodel.h \
         models/server.h \
         models/servercity.h \
         models/servercountry.h \

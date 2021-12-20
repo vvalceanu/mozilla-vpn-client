@@ -126,6 +126,9 @@ constexpr const char* ADJUST_SUBSCRIPTION_COMPLETED =
     ;
 #endif
 
+constexpr const char* RELAY_URL =
+    "https://dev.fxprivaterelay.nonprod.cloudops.mozgcp.net";
+
 };  // namespace Constants
 
 #endif  // CONSTANTS_H

@@ -631,6 +631,31 @@ Item {
         }
     }
 
+    VPNIconButton {
+        id: relayButton
+        objectName: "relayButton"
+        opacity: 1
+        visible: VPNSettings.relayTokenEnabled
+
+        onClicked: {
+            stackview.push("qrc:/ui/views/ViewRelay.qml", StackView.Immediate)
+        }
+
+        anchors.top: settingsButton.bottom
+        anchors.right: parent.right
+        anchors.topMargin: VPNTheme.theme.windowMargin / 2
+        anchors.rightMargin: VPNTheme.theme.windowMargin / 2
+        accessibleName: "Relay"
+        Accessible.ignored: connectionInfoVisible
+        enabled: !connectionInfoVisible
+
+        VPNIcon {
+            id: relayImage
+            source: "qrc:/ui/resources/relay.svg"
+            anchors.centerIn: relayButton
+        }
+    }
+
     Column {
         id: col
 
